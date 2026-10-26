@@ -218,6 +218,51 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
 .crumb{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .crumb i{font-style:normal;color:var(--accent);margin:0 2px}
 .foot a{color:var(--accent)}
+
+/* ---------- Local edition ---------- */
+.localbar{max-width:1280px;margin:0 auto 14px;padding:8px 12px;border-radius:8px;background:var(--ok-soft);color:var(--ink);font-size:.88rem;overflow-wrap:anywhere}
+.localbar b{color:var(--ok)}
+.localbar code{background:transparent;padding:0}
+.savedok{color:var(--ok)}
+
+/* ---------- Offline edition invite ---------- */
+.side-top{display:grid;gap:10px;justify-items:end;flex:0 1 300px;min-width:220px}
+.side-top .progress{width:100%;flex:none}
+.offpill{font:inherit;font-size:.82rem;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s}
+.offpill:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 6px 18px -10px var(--accent)}
+.offpill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pmuted{color:var(--muted)}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 var(--ok);animation:pulse 2.4s ease-out 3}
+.pdot.seen{animation:none;background:var(--muted)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}100%{box-shadow:0 0 0 9px transparent}}
+.offline{width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto;border:1px solid var(--line);border-radius:16px;padding:26px 28px 24px;background:var(--panel);color:var(--ink);box-shadow:0 30px 80px -30px rgba(0,0,0,.45)}
+.offline::backdrop{background:rgba(10,14,22,.45);backdrop-filter:blur(3px)}
+.offline[open]{animation:pop .22s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.off-close-row{position:absolute;top:12px;right:12px;margin:0}
+.off-x{font:inherit;font-size:22px;line-height:1;width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.off-x:hover{background:var(--accent-soft);color:var(--ink)}
+.offline .eyebrow{margin:0}
+.offline h2{font-family:var(--f-display);font-size:1.6rem;margin:.15rem 0 .4rem;letter-spacing:-.01em}
+.off-lead{margin:0 0 14px;color:var(--muted);max-width:56ch}
+.off-why{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:6px;font-size:.93rem}
+.off-why li{padding-left:22px;position:relative}
+.off-why li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+.off-steps{list-style:none;counter-reset:s;padding:0;margin:0 0 12px;display:grid;gap:12px}
+.off-steps li{counter-increment:s;display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 10px;align-items:start}
+.off-steps li::before{content:counter(s);grid-row:span 2;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:.8rem;font-weight:700;margin-top:1px}
+.off-steps li>span{font-size:.93rem;font-weight:700}
+.off-steps em{font-style:normal;font-weight:400;color:var(--muted)}
+.cmd{display:flex;align-items:stretch;background:var(--code-bg);border-radius:8px;overflow:hidden;min-width:0}
+.cmd code{flex:1;min-width:0;background:transparent;color:var(--code-ink);padding:10px 12px;white-space:pre;overflow-x:auto;font-size:.82rem}
+.copy{font:inherit;font-size:.75rem;font-weight:700;border:0;border-left:1px solid #1e2836;background:transparent;color:var(--code-ink);padding:0 12px;cursor:pointer}
+.copy:hover{background:#1a2333}
+.off-note{font-size:.85rem;color:var(--muted);margin:4px 0 18px}
+.off-actions{display:flex;flex-wrap:wrap;gap:8px}
+.off-actions .btn{text-decoration:none}
+.linkbtn{font:inherit;border:0;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@media (max-width:760px){.side-top{justify-items:start;flex-basis:100%}.offline{padding:22px 18px 18px}.pmuted{display:none}}
+@media (prefers-reduced-motion:reduce){.pdot,.offline[open]{animation:none}}
 </style>
 </head>
 <body>
@@ -227,11 +272,41 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
     <h1>Vibe Coder <span>Bootcamp</span></h1>
     <p class="sub">Python from zero to NumPy, pandas, PyTorch and attention, for ML interviews. Every exercise runs in your browser and the tests tell you what's wrong. No autocomplete, no AI.</p>
   </div>
-  <div class="progress" aria-live="polite">
-    <div class="bar"><i id="pbar"></i></div>
-    <small id="ptext"></small>
+  <div class="side-top">
+    <div class="progress" aria-live="polite">
+      <div class="bar"><i id="pbar"></i></div>
+      <small id="ptext"></small>
+    </div>
+    <button class="offpill" id="offpill" type="button" aria-haspopup="dialog">
+      <span class="pdot" id="pdot" aria-hidden="true"></span>Run it offline <span class="pmuted">· progress saved to disk</span>
+    </button>
   </div>
 </header>
+
+<dialog class="offline" id="offline" aria-labelledby="off-title">
+  <form method="dialog" class="off-close-row"><button class="off-x" aria-label="Close">×</button></form>
+  <p class="eyebrow">Local edition</p>
+  <h2 id="off-title">Take the bootcamp offline</h2>
+  <p class="off-lead">The same course, running on your own computer. Your progress and every line you write are saved to a file, so clearing the browser or switching browsers loses nothing.</p>
+  <ul class="off-why">
+    <li><b>Works with no internet</b> and no wait for Python to download</li>
+    <li><b>Real Python</b> with real NumPy and pandas, plus real PyTorch if you want it</li>
+    <li><b>Progress tracked on disk</b> in <code>~/.local/share/vibe-coder-bootcamp/progress.json</code></li>
+    <li><b>Private</b>: it only listens on your own machine, and installs nothing system-wide</li>
+  </ul>
+  <ol class="off-steps">
+    <li><span>Get the code</span><div class="cmd"><code id="c1">git clone https://github.com/CaffineAddic/vibe-coder-bootcamp.git
+cd vibe-coder-bootcamp</code><button class="copy" data-for="c1" type="button">Copy</button></div></li>
+    <li><span>Install it <em>(Linux: Arch, Ubuntu, Fedora…; add <code>--torch</code> for real PyTorch)</em></span><div class="cmd"><code id="c2">./local/install.sh</code><button class="copy" data-for="c2" type="button">Copy</button></div></li>
+    <li><span>Start it, or open <b>Vibe Coder Bootcamp</b> from your app menu</span><div class="cmd"><code id="c3">vibe-bootcamp</code><button class="copy" data-for="c3" type="button">Copy</button></div></li>
+  </ol>
+  <p class="off-note">On macOS or Windows (WSL), skip step 2 and run <code>python3 local/bootcamp.py</code>. It needs only Python. Install <code>numpy</code> and <code>pandas</code> for Parts 3 and 4.</p>
+  <div class="off-actions">
+    <a class="btn primary" href="https://github.com/CaffineAddic/vibe-coder-bootcamp#local-edition-offline-saves-progress-to-disk" target="_blank" rel="noopener">View on GitHub ↗</a>
+    <a class="btn plain" href="https://github.com/CaffineAddic/vibe-coder-bootcamp/blob/main/local/README.md" target="_blank" rel="noopener">Full setup guide</a>
+  </div>
+</dialog>
+<div class="localbar" id="localbar" hidden><b>Local edition</b> · code runs in your own Python · progress is saved to <code id="progpath"></code> · <span id="saved" class="savedok">Saved to disk</span></div>
 <div class="foot" style="margin:0 auto 16px">
   <div class="tabs" role="tablist" aria-label="Sections">
     <button class="tab" role="tab" id="tab-course" aria-selected="true">Course</button>
@@ -314,7 +389,7 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
   </div>
 </div>
 
-<footer class="foot">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> for <a href="https://caffineaddic.github.io/">Saumya Roy</a> &amp; Mehul Goel · Practice the answers: <a href="https://caffineaddic.github.io/ml-interview-playbook/">ML Interview Playbook</a> · <a href="https://github.com/CaffineAddic/vibe-coder-bootcamp">source</a> · MIT license · Progress is saved in this browser only.</footer>
+<footer class="foot">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> for <a href="https://caffineaddic.github.io/">Saumya Roy</a> &amp; Mehul Goel · Practice the answers: <a href="https://caffineaddic.github.io/ml-interview-playbook/">ML Interview Playbook</a> · <a href="https://github.com/CaffineAddic/vibe-coder-bootcamp">source</a> · MIT license · <span class="foot-local">Progress is saved in this browser only. <button type="button" class="linkbtn" id="offfoot">Get the offline version</button> to keep it on disk.</span></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
@@ -3490,12 +3565,49 @@ const CONCEPTS = [
 
 </script>
 <script>
-// Vibe Coder Bootcamp: course UI, in-browser Python runner (Skulpt), and concept cards.
+// Vibe Coder Bootcamp: course UI, Python runners (Pyodide, Skulpt fallback, local server), concept cards.
 (function () {
   const $ = id => document.getElementById(id);
+  // ---------- Local mode ----------
+  // When served by local/bootcamp.py, code runs in this machine's Python and progress
+  // is saved to a file on disk. Detected with a synchronous request at startup so the
+  // saved progress is in place before anything reads it.
+  const LOCAL = (() => {
+    if (!/^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname)) return null;
+    try {
+      const x = new XMLHttpRequest(); x.open("GET", "/api/info", false); x.send();
+      if (x.status !== 200) return null;
+      const info = JSON.parse(x.responseText);
+      if (!info.local) return null;
+      const p = new XMLHttpRequest(); p.open("GET", "/api/progress", false); p.send();
+      const saved = p.status === 200 ? JSON.parse(p.responseText) : {};
+      info.memory = Object.assign({}, saved);
+      // The file on disk wins over the browser's copy, so progress follows you across browsers.
+      try { for (const [k, v] of Object.entries(saved)) localStorage.setItem(k, v); } catch (e) {}
+      return info;
+    } catch (e) { return null; }
+  })();
+  let saveTimer = null;
+  function saveToDisk() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      fetch("/api/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(LOCAL.memory) })
+        .then(r => { if (!r.ok) throw 0; markSaved(true); }).catch(() => markSaved(false));
+    }, 400);
+  }
+  function markSaved(ok) { const el = document.getElementById("saved"); if (el) { el.textContent = ok ? "Saved to disk" : "Couldn't save. Is the local server still running?"; el.className = ok ? "savedok" : "err"; } }
   const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    get(k, d) {
+      try {
+        const v = LOCAL && k in LOCAL.memory ? LOCAL.memory[k] : localStorage.getItem(k);
+        return v === null || v === undefined ? d : JSON.parse(v);
+      } catch (e) { return d; }
+    },
+    set(k, v) {
+      const s = JSON.stringify(v);
+      try { localStorage.setItem(k, s); } catch (e) {}
+      if (LOCAL) { LOCAL.memory[k] = s; saveToDisk(); }
+    },
   };
 
   const PARTS = [
@@ -3575,7 +3687,22 @@ self.onmessage = async (e) => {
       worker.postMessage({ type: "init", id, index: PYODIDE, files: typeof TORCH_FILES !== "undefined" ? TORCH_FILES : {} });
     });
   }
+  function bootLocal() {
+    engine = "local";
+    const pk = LOCAL.packages, bits = ["Local Python " + LOCAL.python];
+    if (pk.numpy) bits.push("NumPy " + pk.numpy);
+    if (pk.pandas) bits.push("pandas " + pk.pandas);
+    bits.push(LOCAL.torch === "real" ? "PyTorch " + pk.torch : "torchlite");
+    setStatus(bits.join(" · "));
+    return Promise.resolve();
+  }
+  function localRun(src) {
+    return fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: src }) })
+      .then(r => r.json())
+      .catch(() => ({ ok: false, out: "", error: "Lost contact with the local server. Start it again with: vibe-bootcamp" }));
+  }
   function boot() {
+    if (LOCAL) return bootLocal();
     engine = "loading";
     setStatus("Loading Python… (about 10 s the first time)", "loading");
     return startWorker().then(() => { engine = "pyodide"; setStatus("Python 3 ready"); })
@@ -3619,6 +3746,7 @@ self.onmessage = async (e) => {
   async function runPython(src, wantResults, onStart) {
     await booting;
     const pk = LESSONS[cur].packages || [];
+    if (engine === "local") { if (onStart) onStart(); return localRun(src); }
     if (engine === "pyodide") return pyodideRun(src, pk, onStart);
     if (engine === "skulpt" && !pk.length) return skulptRun(src, wantResults);
     return { ok: false, out: "", error: needsFullMessage() };
@@ -3629,7 +3757,7 @@ self.onmessage = async (e) => {
   }
   function refreshNotice() {
     const pk = LESSONS[cur] && LESSONS[cur].packages;
-    $("libnote").hidden = !(pk && pk.length && engine !== "pyodide" && engine !== "loading");
+    $("libnote").hidden = !(pk && pk.length && engine !== "pyodide" && engine !== "local" && engine !== "loading");
     $("libnote").textContent = needsFullMessage();
   }
   function cleanTrace(s) {
@@ -3701,7 +3829,7 @@ self.onmessage = async (e) => {
     if (l.learn) { $("learn").innerHTML = l.learn; $("example").textContent = l.example; $("exout").hidden = true; }
     drawFigure(l);
     $("why").textContent = l.why; $("task").innerHTML = l.task; $("pseudo").textContent = l.pseudo;
-    ed.value = store.get("vcb.code." + l.id, l.starter); gutter();
+    ed.value = store.get("vcb.code." + l.id, l.starter); edLesson = l.id; gutter();
     ["d-pseudo", "d-hints", "d-sol"].forEach(d => ($(d).open = false));
     renderHints(); renderSol();
     $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = DEFAULT_OUT;
@@ -3744,7 +3872,10 @@ self.onmessage = async (e) => {
   }
 
   // ---------- Editor ----------
-  function saveCode() { if (LESSONS[cur]) store.set("vcb.code." + LESSONS[cur].id, ed.value); }
+  // edLesson is the lesson whose code is in the editor; null until the first lesson loads,
+  // so the empty editor at startup never overwrites a saved draft.
+  let edLesson = null;
+  function saveCode() { if (edLesson) store.set("vcb.code." + edLesson, ed.value); }
   ed.addEventListener("input", () => { gutter(); saveCode(); });
   ed.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runTests(); return; }
@@ -3770,7 +3901,7 @@ self.onmessage = async (e) => {
   let busy = false;
   function loadingText(base) {
     const pk = (LESSONS[cur].packages || []).filter(p => p !== "torch");
-    return pk.length ? "Loading " + pk.join(" and ") + " (first time only)…" : base;
+    return pk.length && engine !== "local" ? "Loading " + pk.join(" and ") + " (first time only)…" : base;
   }
   async function guarded(fn) { if (busy) return; busy = true; try { await fn(); } finally { busy = false; } }
   const runExample = () => guarded(async () => {
@@ -3873,6 +4004,35 @@ self.onmessage = async (e) => {
   $("tab-course").onclick = () => tab("course");
   $("tab-cards").onclick = () => tab("cards");
 
+  // ---------- Offline edition invite ----------
+  // A quiet pill in the header; the panel opens only when asked. Hidden in the local edition.
+  (function offlineInvite() {
+    const pill = $("offpill"), dlg = $("offline"), foot = document.querySelector(".foot-local");
+    if (LOCAL) { pill.hidden = true; if (foot) foot.hidden = true; return; }
+    if (store.get("vcb.offline.seen", false)) $("pdot").classList.add("seen");
+    const open = (from) => {
+      if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+      $("pdot").classList.add("seen"); store.set("vcb.offline.seen", true);
+      track("offline/open-" + from, "Opened offline info");
+    };
+    pill.onclick = () => open("header");
+    $("offfoot").onclick = () => open("footer");
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+    dlg.querySelectorAll(".copy").forEach(b => b.onclick = () => {
+      const code = $(b.dataset.for), txt = code.textContent;
+      const done = () => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1600); };
+      const pick = () => { const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected"; setTimeout(() => (b.textContent = "Copy"), 1600); };
+      try { navigator.clipboard.writeText(txt).then(done, pick); } catch (e) { pick(); }
+      track("offline/copy-" + b.dataset.for, "Copied install step");
+    });
+    dlg.querySelectorAll(".off-actions a").forEach(a => a.addEventListener("click", () => track("offline/github", "Opened GitHub from offline panel")));
+  })();
+
+  if (LOCAL) {
+    const b = document.getElementById("localbar");
+    b.hidden = false;
+    document.getElementById("progpath").textContent = LOCAL.progress_file;
+  }
   drawFilters(); buildDeck();
   tab(location.hash === "#cards" ? "cards" : store.get("vcb.tab", "course"));
   go(cur);

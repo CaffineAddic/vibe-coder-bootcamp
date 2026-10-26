@@ -32,7 +32,7 @@ Every exercise has:
 - pseudocode, progressive hints, and a solution that stays hidden until you say you've tried
 - a 20-minute interview timer and a "when you freeze" checklist
 
-Progress and your code are saved in your browser's local storage.
+On the website, progress and your code are saved in your browser's local storage. To keep them in a file, use the [local edition](#local-edition-offline-saves-progress-to-disk).
 
 ## How the code runs
 
@@ -56,6 +56,39 @@ If you can write `matmul` and `softmax` with loops, the NumPy and PyTorch versio
 python3 -m http.server 8000
 # open http://localhost:8000
 ```
+
+## Local edition (offline, saves progress to disk)
+
+The website keeps your progress in your browser only. The **local edition** runs the same course on your own computer and saves your progress, and every line you write, to a file. Clearing the browser or switching browsers loses nothing.
+
+- **Works offline**, with no wait for Python to download
+- **Real Python**: real NumPy and pandas, plus real PyTorch if you want it
+- **Progress tracked on disk** in `~/.local/share/vibe-coder-bootcamp/progress.json`, with a `.bak` of the previous save
+- **Private**: it only listens on `127.0.0.1` and installs nothing system-wide
+
+**Linux (Arch, Ubuntu, Fedora…)**
+
+```sh
+git clone https://github.com/CaffineAddic/vibe-coder-bootcamp.git
+cd vibe-coder-bootcamp
+./local/install.sh          # add --torch for real PyTorch (CPU, ~200 MB)
+vibe-bootcamp               # or open "Vibe Coder Bootcamp" from your app menu
+```
+
+On Arch, install Python first if you don't have it: `sudo pacman -S --needed python`.
+
+**macOS or Windows (WSL)**
+
+```sh
+git clone https://github.com/CaffineAddic/vibe-coder-bootcamp.git
+cd vibe-coder-bootcamp
+pip install numpy pandas    # optional: torch
+python3 local/bootcamp.py
+```
+
+Update later with `git pull && ./local/install.sh`. Your progress is kept. `vibe-bootcamp --stop` stops a server started from the app menu, and `./local/install.sh --uninstall` removes everything except your progress. More in [local/README.md](local/README.md).
+
+The website mentions the local edition with a small "Run it offline" button in the header and a link in the footer. Neither appears in the local edition itself.
 
 ## Suggested two-week plan
 
@@ -91,6 +124,9 @@ course/
   visuals.js          one diagram per lesson (inline SVG)
   concepts.js         concept cards
   harness.js          test helpers (check, close)
+local/
+  bootcamp.py         local server: runs code in your Python, saves progress to disk
+  install.sh          per-user installer (venv, command, app-menu entry)
 tools/torch-files.js  packages torchlite.py as an importable `torch` package
 tests/
   check-solutions.js  runs every reference solution against its tests
@@ -112,7 +148,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to add lessons or cards.
 
 ## Analytics
 
-Page views are counted with [GoatCounter](https://www.goatcounter.com), which uses no cookies and collects no personal data. The page also sends events for lessons opened (`lesson/<id>`), lessons solved (`solved/<id>`) and tab switches. If you fork this repo, change or remove the `data-goatcounter` script at the bottom of `index.html`.
+Page views are counted with [GoatCounter](https://www.goatcounter.com), which uses no cookies and collects no personal data. The page also sends events for lessons opened (`lesson/<id>`), lessons solved (`solved/<id>`), tab switches and the offline panel (`offline/...`). The local edition sends nothing, because GoatCounter ignores localhost. If you fork this repo, change or remove the `data-goatcounter` script at the bottom of `index.html`.
 
 ## Credits
 

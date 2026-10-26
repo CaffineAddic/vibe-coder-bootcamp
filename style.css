@@ -196,3 +196,48 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
 .crumb{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .crumb i{font-style:normal;color:var(--accent);margin:0 2px}
 .foot a{color:var(--accent)}
+
+/* ---------- Local edition ---------- */
+.localbar{max-width:1280px;margin:0 auto 14px;padding:8px 12px;border-radius:8px;background:var(--ok-soft);color:var(--ink);font-size:.88rem;overflow-wrap:anywhere}
+.localbar b{color:var(--ok)}
+.localbar code{background:transparent;padding:0}
+.savedok{color:var(--ok)}
+
+/* ---------- Offline edition invite ---------- */
+.side-top{display:grid;gap:10px;justify-items:end;flex:0 1 300px;min-width:220px}
+.side-top .progress{width:100%;flex:none}
+.offpill{font:inherit;font-size:.82rem;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s}
+.offpill:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 6px 18px -10px var(--accent)}
+.offpill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pmuted{color:var(--muted)}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 var(--ok);animation:pulse 2.4s ease-out 3}
+.pdot.seen{animation:none;background:var(--muted)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}100%{box-shadow:0 0 0 9px transparent}}
+.offline{width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto;border:1px solid var(--line);border-radius:16px;padding:26px 28px 24px;background:var(--panel);color:var(--ink);box-shadow:0 30px 80px -30px rgba(0,0,0,.45)}
+.offline::backdrop{background:rgba(10,14,22,.45);backdrop-filter:blur(3px)}
+.offline[open]{animation:pop .22s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.off-close-row{position:absolute;top:12px;right:12px;margin:0}
+.off-x{font:inherit;font-size:22px;line-height:1;width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.off-x:hover{background:var(--accent-soft);color:var(--ink)}
+.offline .eyebrow{margin:0}
+.offline h2{font-family:var(--f-display);font-size:1.6rem;margin:.15rem 0 .4rem;letter-spacing:-.01em}
+.off-lead{margin:0 0 14px;color:var(--muted);max-width:56ch}
+.off-why{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:6px;font-size:.93rem}
+.off-why li{padding-left:22px;position:relative}
+.off-why li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+.off-steps{list-style:none;counter-reset:s;padding:0;margin:0 0 12px;display:grid;gap:12px}
+.off-steps li{counter-increment:s;display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 10px;align-items:start}
+.off-steps li::before{content:counter(s);grid-row:span 2;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:.8rem;font-weight:700;margin-top:1px}
+.off-steps li>span{font-size:.93rem;font-weight:700}
+.off-steps em{font-style:normal;font-weight:400;color:var(--muted)}
+.cmd{display:flex;align-items:stretch;background:var(--code-bg);border-radius:8px;overflow:hidden;min-width:0}
+.cmd code{flex:1;min-width:0;background:transparent;color:var(--code-ink);padding:10px 12px;white-space:pre;overflow-x:auto;font-size:.82rem}
+.copy{font:inherit;font-size:.75rem;font-weight:700;border:0;border-left:1px solid #1e2836;background:transparent;color:var(--code-ink);padding:0 12px;cursor:pointer}
+.copy:hover{background:#1a2333}
+.off-note{font-size:.85rem;color:var(--muted);margin:4px 0 18px}
+.off-actions{display:flex;flex-wrap:wrap;gap:8px}
+.off-actions .btn{text-decoration:none}
+.linkbtn{font:inherit;border:0;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@media (max-width:760px){.side-top{justify-items:start;flex-basis:100%}.offline{padding:22px 18px 18px}.pmuted{display:none}}
+@media (prefers-reduced-motion:reduce){.pdot,.offline[open]{animation:none}}

@@ -1,9 +1,46 @@
-// Vibe Coder Bootcamp: course UI, in-browser Python runner (Skulpt), and concept cards.
+// Vibe Coder Bootcamp: course UI, Python runners (Pyodide, Skulpt fallback, local server), concept cards.
 (function () {
   const $ = id => document.getElementById(id);
+  // ---------- Local mode ----------
+  // When served by local/bootcamp.py, code runs in this machine's Python and progress
+  // is saved to a file on disk. Detected with a synchronous request at startup so the
+  // saved progress is in place before anything reads it.
+  const LOCAL = (() => {
+    if (!/^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname)) return null;
+    try {
+      const x = new XMLHttpRequest(); x.open("GET", "/api/info", false); x.send();
+      if (x.status !== 200) return null;
+      const info = JSON.parse(x.responseText);
+      if (!info.local) return null;
+      const p = new XMLHttpRequest(); p.open("GET", "/api/progress", false); p.send();
+      const saved = p.status === 200 ? JSON.parse(p.responseText) : {};
+      info.memory = Object.assign({}, saved);
+      // The file on disk wins over the browser's copy, so progress follows you across browsers.
+      try { for (const [k, v] of Object.entries(saved)) localStorage.setItem(k, v); } catch (e) {}
+      return info;
+    } catch (e) { return null; }
+  })();
+  let saveTimer = null;
+  function saveToDisk() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      fetch("/api/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(LOCAL.memory) })
+        .then(r => { if (!r.ok) throw 0; markSaved(true); }).catch(() => markSaved(false));
+    }, 400);
+  }
+  function markSaved(ok) { const el = document.getElementById("saved"); if (el) { el.textContent = ok ? "Saved to disk" : "Couldn't save. Is the local server still running?"; el.className = ok ? "savedok" : "err"; } }
   const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    get(k, d) {
+      try {
+        const v = LOCAL && k in LOCAL.memory ? LOCAL.memory[k] : localStorage.getItem(k);
+        return v === null || v === undefined ? d : JSON.parse(v);
+      } catch (e) { return d; }
+    },
+    set(k, v) {
+      const s = JSON.stringify(v);
+      try { localStorage.setItem(k, s); } catch (e) {}
+      if (LOCAL) { LOCAL.memory[k] = s; saveToDisk(); }
+    },
   };
 
   const PARTS = [
@@ -83,7 +120,22 @@ self.onmessage = async (e) => {
       worker.postMessage({ type: "init", id, index: PYODIDE, files: typeof TORCH_FILES !== "undefined" ? TORCH_FILES : {} });
     });
   }
+  function bootLocal() {
+    engine = "local";
+    const pk = LOCAL.packages, bits = ["Local Python " + LOCAL.python];
+    if (pk.numpy) bits.push("NumPy " + pk.numpy);
+    if (pk.pandas) bits.push("pandas " + pk.pandas);
+    bits.push(LOCAL.torch === "real" ? "PyTorch " + pk.torch : "torchlite");
+    setStatus(bits.join(" · "));
+    return Promise.resolve();
+  }
+  function localRun(src) {
+    return fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: src }) })
+      .then(r => r.json())
+      .catch(() => ({ ok: false, out: "", error: "Lost contact with the local server. Start it again with: vibe-bootcamp" }));
+  }
   function boot() {
+    if (LOCAL) return bootLocal();
     engine = "loading";
     setStatus("Loading Python… (about 10 s the first time)", "loading");
     return startWorker().then(() => { engine = "pyodide"; setStatus("Python 3 ready"); })
@@ -127,6 +179,7 @@ self.onmessage = async (e) => {
   async function runPython(src, wantResults, onStart) {
     await booting;
     const pk = LESSONS[cur].packages || [];
+    if (engine === "local") { if (onStart) onStart(); return localRun(src); }
     if (engine === "pyodide") return pyodideRun(src, pk, onStart);
     if (engine === "skulpt" && !pk.length) return skulptRun(src, wantResults);
     return { ok: false, out: "", error: needsFullMessage() };
@@ -137,7 +190,7 @@ self.onmessage = async (e) => {
   }
   function refreshNotice() {
     const pk = LESSONS[cur] && LESSONS[cur].packages;
-    $("libnote").hidden = !(pk && pk.length && engine !== "pyodide" && engine !== "loading");
+    $("libnote").hidden = !(pk && pk.length && engine !== "pyodide" && engine !== "local" && engine !== "loading");
     $("libnote").textContent = needsFullMessage();
   }
   function cleanTrace(s) {
@@ -209,7 +262,7 @@ self.onmessage = async (e) => {
     if (l.learn) { $("learn").innerHTML = l.learn; $("example").textContent = l.example; $("exout").hidden = true; }
     drawFigure(l);
     $("why").textContent = l.why; $("task").innerHTML = l.task; $("pseudo").textContent = l.pseudo;
-    ed.value = store.get("vcb.code." + l.id, l.starter); gutter();
+    ed.value = store.get("vcb.code." + l.id, l.starter); edLesson = l.id; gutter();
     ["d-pseudo", "d-hints", "d-sol"].forEach(d => ($(d).open = false));
     renderHints(); renderSol();
     $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = DEFAULT_OUT;
@@ -252,7 +305,10 @@ self.onmessage = async (e) => {
   }
 
   // ---------- Editor ----------
-  function saveCode() { if (LESSONS[cur]) store.set("vcb.code." + LESSONS[cur].id, ed.value); }
+  // edLesson is the lesson whose code is in the editor; null until the first lesson loads,
+  // so the empty editor at startup never overwrites a saved draft.
+  let edLesson = null;
+  function saveCode() { if (edLesson) store.set("vcb.code." + edLesson, ed.value); }
   ed.addEventListener("input", () => { gutter(); saveCode(); });
   ed.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runTests(); return; }
@@ -278,7 +334,7 @@ self.onmessage = async (e) => {
   let busy = false;
   function loadingText(base) {
     const pk = (LESSONS[cur].packages || []).filter(p => p !== "torch");
-    return pk.length ? "Loading " + pk.join(" and ") + " (first time only)…" : base;
+    return pk.length && engine !== "local" ? "Loading " + pk.join(" and ") + " (first time only)…" : base;
   }
   async function guarded(fn) { if (busy) return; busy = true; try { await fn(); } finally { busy = false; } }
   const runExample = () => guarded(async () => {
@@ -381,6 +437,35 @@ self.onmessage = async (e) => {
   $("tab-course").onclick = () => tab("course");
   $("tab-cards").onclick = () => tab("cards");
 
+  // ---------- Offline edition invite ----------
+  // A quiet pill in the header; the panel opens only when asked. Hidden in the local edition.
+  (function offlineInvite() {
+    const pill = $("offpill"), dlg = $("offline"), foot = document.querySelector(".foot-local");
+    if (LOCAL) { pill.hidden = true; if (foot) foot.hidden = true; return; }
+    if (store.get("vcb.offline.seen", false)) $("pdot").classList.add("seen");
+    const open = (from) => {
+      if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+      $("pdot").classList.add("seen"); store.set("vcb.offline.seen", true);
+      track("offline/open-" + from, "Opened offline info");
+    };
+    pill.onclick = () => open("header");
+    $("offfoot").onclick = () => open("footer");
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+    dlg.querySelectorAll(".copy").forEach(b => b.onclick = () => {
+      const code = $(b.dataset.for), txt = code.textContent;
+      const done = () => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1600); };
+      const pick = () => { const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected"; setTimeout(() => (b.textContent = "Copy"), 1600); };
+      try { navigator.clipboard.writeText(txt).then(done, pick); } catch (e) { pick(); }
+      track("offline/copy-" + b.dataset.for, "Copied install step");
+    });
+    dlg.querySelectorAll(".off-actions a").forEach(a => a.addEventListener("click", () => track("offline/github", "Opened GitHub from offline panel")));
+  })();
+
+  if (LOCAL) {
+    const b = document.getElementById("localbar");
+    b.hidden = false;
+    document.getElementById("progpath").textContent = LOCAL.progress_file;
+  }
   drawFilters(); buildDeck();
   tab(location.hash === "#cards" ? "cards" : store.get("vcb.tab", "course"));
   go(cur);

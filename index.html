@@ -28,11 +28,41 @@
     <h1>Vibe Coder <span>Bootcamp</span></h1>
     <p class="sub">Python from zero to NumPy, pandas, PyTorch and attention, for ML interviews. Every exercise runs in your browser and the tests tell you what's wrong. No autocomplete, no AI.</p>
   </div>
-  <div class="progress" aria-live="polite">
-    <div class="bar"><i id="pbar"></i></div>
-    <small id="ptext"></small>
+  <div class="side-top">
+    <div class="progress" aria-live="polite">
+      <div class="bar"><i id="pbar"></i></div>
+      <small id="ptext"></small>
+    </div>
+    <button class="offpill" id="offpill" type="button" aria-haspopup="dialog">
+      <span class="pdot" id="pdot" aria-hidden="true"></span>Run it offline <span class="pmuted">· progress saved to disk</span>
+    </button>
   </div>
 </header>
+
+<dialog class="offline" id="offline" aria-labelledby="off-title">
+  <form method="dialog" class="off-close-row"><button class="off-x" aria-label="Close">×</button></form>
+  <p class="eyebrow">Local edition</p>
+  <h2 id="off-title">Take the bootcamp offline</h2>
+  <p class="off-lead">The same course, running on your own computer. Your progress and every line you write are saved to a file, so clearing the browser or switching browsers loses nothing.</p>
+  <ul class="off-why">
+    <li><b>Works with no internet</b> and no wait for Python to download</li>
+    <li><b>Real Python</b> with real NumPy and pandas, plus real PyTorch if you want it</li>
+    <li><b>Progress tracked on disk</b> in <code>~/.local/share/vibe-coder-bootcamp/progress.json</code></li>
+    <li><b>Private</b>: it only listens on your own machine, and installs nothing system-wide</li>
+  </ul>
+  <ol class="off-steps">
+    <li><span>Get the code</span><div class="cmd"><code id="c1">git clone https://github.com/CaffineAddic/vibe-coder-bootcamp.git
+cd vibe-coder-bootcamp</code><button class="copy" data-for="c1" type="button">Copy</button></div></li>
+    <li><span>Install it <em>(Linux: Arch, Ubuntu, Fedora…; add <code>--torch</code> for real PyTorch)</em></span><div class="cmd"><code id="c2">./local/install.sh</code><button class="copy" data-for="c2" type="button">Copy</button></div></li>
+    <li><span>Start it, or open <b>Vibe Coder Bootcamp</b> from your app menu</span><div class="cmd"><code id="c3">vibe-bootcamp</code><button class="copy" data-for="c3" type="button">Copy</button></div></li>
+  </ol>
+  <p class="off-note">On macOS or Windows (WSL), skip step 2 and run <code>python3 local/bootcamp.py</code>. It needs only Python. Install <code>numpy</code> and <code>pandas</code> for Parts 3 and 4.</p>
+  <div class="off-actions">
+    <a class="btn primary" href="https://github.com/CaffineAddic/vibe-coder-bootcamp#local-edition-offline-saves-progress-to-disk" target="_blank" rel="noopener">View on GitHub ↗</a>
+    <a class="btn plain" href="https://github.com/CaffineAddic/vibe-coder-bootcamp/blob/main/local/README.md" target="_blank" rel="noopener">Full setup guide</a>
+  </div>
+</dialog>
+<div class="localbar" id="localbar" hidden><b>Local edition</b> · code runs in your own Python · progress is saved to <code id="progpath"></code> · <span id="saved" class="savedok">Saved to disk</span></div>
 <div class="foot" style="margin:0 auto 16px">
   <div class="tabs" role="tablist" aria-label="Sections">
     <button class="tab" role="tab" id="tab-course" aria-selected="true">Course</button>
@@ -115,7 +145,7 @@
   </div>
 </div>
 
-<footer class="foot">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> for <a href="https://caffineaddic.github.io/">Saumya Roy</a> &amp; Mehul Goel · Practice the answers: <a href="https://caffineaddic.github.io/ml-interview-playbook/">ML Interview Playbook</a> · <a href="https://github.com/CaffineAddic/vibe-coder-bootcamp">source</a> · MIT license · Progress is saved in this browser only.</footer>
+<footer class="foot">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> for <a href="https://caffineaddic.github.io/">Saumya Roy</a> &amp; Mehul Goel · Practice the answers: <a href="https://caffineaddic.github.io/ml-interview-playbook/">ML Interview Playbook</a> · <a href="https://github.com/CaffineAddic/vibe-coder-bootcamp">source</a> · MIT license · <span class="foot-local">Progress is saved in this browser only. <button type="button" class="linkbtn" id="offfoot">Get the offline version</button> to keep it on disk.</span></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
