@@ -202,6 +202,7 @@ self.onmessage = async (e) => {
     $("title").textContent = l.title;
     $("learnbox").hidden = !l.learn;
     if (l.learn) { $("learn").innerHTML = l.learn; $("example").textContent = l.example; $("exout").hidden = true; }
+    drawFigure(l);
     $("why").textContent = l.why; $("task").innerHTML = l.task; $("pseudo").textContent = l.pseudo;
     ed.value = store.get("vcb.code." + l.id, l.starter); gutter();
     ["d-pseudo", "d-hints", "d-sol"].forEach(d => ($(d).open = false));
@@ -209,6 +210,17 @@ self.onmessage = async (e) => {
     $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = DEFAULT_OUT;
     refreshNotice();
     buildNav();
+  }
+
+  // ---------- Diagrams ----------
+  // Place the figure after the explanation when a lesson has one, otherwise under the title.
+  function drawFigure(l) {
+    const fig = $("fig"), v = typeof VISUALS !== "undefined" && VISUALS[l.id];
+    fig.hidden = !v;
+    if (!v) return;
+    try { $("figsvg").innerHTML = v.draw(); $("figcap").textContent = v.caption; }
+    catch (e) { fig.hidden = true; return; }
+    if (l.learn) $("learn").after(fig); else $("title").after(fig);
   }
 
   // ---------- Hints & solution ----------

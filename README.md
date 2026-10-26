@@ -24,6 +24,8 @@ argmax · tokenizing and vocab · dot product · mean/std · standardization · 
 
 **Concept cards (53).** Python, CS basics, ML fundamentals, training, NumPy, pandas, data prep, PyTorch and transformers. Answer out loud, reveal, and rate yourself. Cards you miss come back first.
 
+Every lesson has a diagram: memory and the call stack, matrix multiply cell by cell, broadcasting, softmax, the causal mask, groupby, leakage-safe splits, autograd graphs, multi-head reshapes and the transformer block. They're inline SVG and follow light and dark mode.
+
 Every exercise has:
 - a short "why this matters in interviews" note
 - tests that run your code and tell you exactly what's wrong
@@ -76,6 +78,7 @@ Rules that make it work: turn off AI autocomplete, struggle for 15 minutes befor
 index.html            page shell
 style.css             styles (light and dark)
 favicon.svg           browser-tab icon
+og.png                link-preview image (1200×627)
 app.js                course UI, Python runner (Pyodide worker + Skulpt fallback), concept cards
 course/
   foundations.js      Part 1
@@ -85,6 +88,7 @@ course/
   pytorch.js          Part 5
   torchlite.py        the PyTorch-compatible teaching library
   torchlite.js        generated from torchlite.py by build.js
+  visuals.js          one diagram per lesson (inline SVG)
   concepts.js         concept cards
   harness.js          test helpers (check, close)
 tools/torch-files.js  packages torchlite.py as an importable `torch` package
@@ -108,7 +112,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to add lessons or cards.
 
 ## Credits
 
-Made with [Claude](https://claude.ai).
+By Saumya Roy and Mehul Goel. Made with [Claude](https://claude.ai).
 
 ## License
 

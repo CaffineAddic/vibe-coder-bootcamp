@@ -6,7 +6,17 @@
 <title>Vibe Coder Bootcamp</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Learn to write code yourself again: Python from zero up to implementing attention, with runnable exercises and tests in the browser.">
+<meta name="description" content="A free browser-based Python course from basics to NumPy, PyTorch and attention, with real tests, no autocomplete and a 20-minute interview timer.">
+<meta name="author" content="Saumya Roy, Mehul Goel">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://caffineaddic.github.io/vibe-coder-bootcamp/">
+<meta property="og:title" content="Vibe Coder Bootcamp — write the code yourself">
+<meta property="og:description" content="A free browser-based Python course from basics to NumPy, PyTorch and attention, with real tests, no autocomplete and a 20-minute interview timer.">
+<meta property="og:image" content="https://caffineaddic.github.io/vibe-coder-bootcamp/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="Vibe Coder Bootcamp: write the code yourself. No autocomplete.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -36,6 +46,7 @@
     <section class="card">
       <div class="eyebrow" id="eyebrow"></div>
       <h2 id="title"></h2>
+      <figure class="fig" id="fig" hidden><div id="figsvg"></div><figcaption id="figcap"></figcaption></figure>
       <div id="learnbox" hidden>
         <div class="learn" id="learn"></div>
         <div class="example">
@@ -114,6 +125,7 @@
 <script src="course/data.js"></script>
 <script src="course/pytorch.js"></script>
 <script src="course/torchlite.js"></script>
+<script src="course/visuals.js"></script>
 <script src="course/concepts.js"></script>
 <script src="app.js"></script>
 </body>

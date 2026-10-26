@@ -32,3 +32,7 @@ Guidelines:
 ## Adding a concept card
 
 Add `{topic, q, a}` to `course/concepts.js`. Answers should be two to four sentences that someone could say out loud in an interview.
+
+## Adding a diagram
+
+Add an entry to `course/visuals.js` keyed by the lesson `id`: `{caption, draw}` where `draw()` returns an SVG string built with the helpers at the top of the file. Use the CSS classes (`bx`, `acc`, `ok`, `bad`, `t`, `ta`, `tm`...) instead of colors so it works in both themes. Keep every label inside the viewBox.

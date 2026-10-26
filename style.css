@@ -126,3 +126,64 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
 .tally{color:var(--muted);font-size:.9rem}
 .foot{max-width:1280px;margin:32px auto 0;color:var(--muted);font-size:.85rem}
 .foot a{color:var(--accent)}
+/* ---------- Lesson diagrams ---------- */
+.fig{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow-x:auto}
+.fig svg{display:block;margin:0 auto;height:auto;font-family:var(--f-mono);font-size:13px;overflow:visible}
+.fig figcaption{margin:10px auto 0;max-width:68ch;color:var(--muted);font-size:.9rem;text-align:center;text-wrap:balance}
+.fig .bx{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.fig .bx2{fill:var(--panel);stroke:var(--muted);stroke-width:1.2}
+.fig .hdr{fill:var(--line);stroke:none}
+.fig .acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.fig .accf{fill:var(--accent);stroke:none}
+.fig .ok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.5}
+.fig .bad{fill:var(--bad-soft);stroke:var(--bad);stroke-width:1.5}
+.fig .dim{fill:var(--bg);stroke:var(--line);stroke-width:1;stroke-dasharray:3 3}
+.fig .code{fill:var(--code-bg);stroke:none}
+.fig .band{fill:var(--accent-soft);stroke:none;opacity:.7}
+.fig .regionA{fill:var(--accent-soft);stroke:none}
+.fig text{fill:var(--ink)}
+.fig .t{fill:var(--ink)}
+.fig .ta,.fig .tac{fill:var(--accent);font-weight:600}
+.fig .tac{font-size:12px}
+.fig .to{fill:var(--ok);font-weight:600}
+.fig .tb{fill:var(--bad);font-weight:600}
+.fig .tm{fill:var(--muted);font-size:12px}
+.fig .td{fill:var(--muted);opacity:.7}
+.fig .th{fill:var(--ink);font-weight:600;font-size:12px}
+.fig .code ~ .tm.mono,.fig .mono{font-family:var(--f-mono);font-size:12.5px}
+.fig .code ~ text.tm{fill:var(--gutter)}
+.fig .code ~ text.t{fill:var(--code-ink)}
+.fig .ln,.fig .lnf,.fig .lna,.fig .lnb,.fig .gr,.fig .ax,.fig .cv,.fig .back,.fig .cross{fill:none}
+.fig .ln{stroke:var(--muted);stroke-width:1.5}
+.fig .lnf{stroke:var(--line);stroke-width:1.5}
+.fig .lna{stroke:var(--accent);stroke-width:2}
+.fig .lnb{stroke:var(--bad);stroke-width:2;stroke-dasharray:4 3}
+.fig .gr{stroke:var(--line);stroke-width:1}
+.fig .ax{stroke:var(--muted);stroke-width:1.2}
+.fig .cv{stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.fig .c1{stroke:var(--accent)}
+.fig .c2{stroke:var(--bad)}
+.fig .c3{stroke:var(--ok)}
+.fig .c4{stroke:var(--warn)}
+.fig .c5{stroke:var(--muted)}
+.fig .back{stroke:var(--bad);stroke-width:2;stroke-dasharray:6 4}
+.fig .cross{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.fig .ar,.fig .ara,.fig .arb,.fig .arm{stroke-width:1.8}
+.fig .ar{stroke:var(--muted)} .fig .arh{fill:var(--muted)}
+.fig .ara{stroke:var(--accent)} .fig .arah{fill:var(--accent)}
+.fig .arb{stroke:var(--bad)} .fig .arbh{fill:var(--bad)}
+.fig .arm{stroke:var(--ink);stroke-width:2.2} .fig .armh{fill:var(--ink)}
+.fig .dot{fill:var(--muted)}
+.fig .dotf{fill:var(--muted);stroke:var(--panel);stroke-width:1.5}
+.fig .dota{fill:var(--accent);stroke:var(--panel);stroke-width:1.5}
+.fig .dotb{fill:var(--bad);stroke:var(--panel);stroke-width:1.5}
+.fig .nodea{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.8}
+.fig .nodeb{fill:var(--panel);stroke:var(--muted);stroke-width:1.5}
+.fig .ring{fill:var(--accent-soft);fill-opacity:.5;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
+.fig .ringf{fill:none;stroke:var(--line);stroke-width:3}
+.fig .query{fill:var(--warn);stroke:var(--panel);stroke-width:1.5}
+@media (max-width:640px){
+  .fig{padding:10px}
+  .fig svg{min-width:540px;margin:0}
+  .fig figcaption{position:sticky;left:0;max-width:calc(100vw - 80px);text-align:left}
+}
