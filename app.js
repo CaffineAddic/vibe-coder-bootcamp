@@ -195,8 +195,13 @@ self.onmessage = async (e) => {
     $("gut").textContent = s;
     ed.style.height = "auto"; ed.style.height = ed.scrollHeight + "px";
   }
+  // Analytics: record which lessons and tabs people open (GoatCounter events, no cookies).
+  function track(path, title) {
+    try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title, event: true }); } catch (e) {}
+  }
   function go(i) {
-    saveCode(); cur = i; store.set("vcb.cur", i);
+    saveCode(); cur = i;
+    track("lesson/" + LESSONS[i].id, LESSONS[i].title); store.set("vcb.cur", i);
     const l = LESSONS[i]; hintN = 0; solStep = 0;
     $("eyebrow").textContent = l.stage + " · lesson " + (i + 1) + " of " + LESSONS.length;
     $("title").textContent = l.title;
@@ -300,6 +305,7 @@ self.onmessage = async (e) => {
     });
     res.hidden = false; $("out").textContent = out;
     if (pass === r.length) {
+      if (!solved[l.id]) track("solved/" + l.id, "Solved: " + l.title);
       solved[l.id] = true; store.set("vcb.solved", solved);
       const last = cur === LESSONS.length - 1;
       $("banner").innerHTML = '<div class="banner win">All ' + r.length + " tests pass." +
@@ -370,6 +376,7 @@ self.onmessage = async (e) => {
     $("view-course").hidden = !course; $("view-cards").hidden = course;
     $("tab-course").setAttribute("aria-selected", course); $("tab-cards").setAttribute("aria-selected", !course);
     store.set("vcb.tab", which);
+    track("tab/" + which, which === "cards" ? "Concept cards" : "Course");
   }
   $("tab-course").onclick = () => tab("course");
   $("tab-cards").onclick = () => tab("cards");

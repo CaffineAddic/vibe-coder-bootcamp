@@ -110,6 +110,10 @@ npm run build             # regenerate torchlite.js and the single-file build
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to add lessons or cards.
 
+## Analytics
+
+Page views are counted with [GoatCounter](https://www.goatcounter.com), which uses no cookies and collects no personal data. The page also sends events for lessons opened (`lesson/<id>`), lessons solved (`solved/<id>`) and tab switches. If you fork this repo, change or remove the `data-goatcounter` script at the bottom of `index.html`.
+
 ## Credits
 
 By Saumya Roy and Mehul Goel. Made with [Claude](https://claude.ai).

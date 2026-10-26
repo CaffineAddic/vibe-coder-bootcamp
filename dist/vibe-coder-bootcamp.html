@@ -209,11 +209,21 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
   .fig svg{min-width:540px;margin:0}
   .fig figcaption{position:sticky;left:0;max-width:calc(100vw - 80px);text-align:left}
 }
+
+/* ---------- Portfolio link ---------- */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.home{font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--accent-ink);background:var(--accent);border-radius:5px;padding:4px 7px;text-decoration:none;letter-spacing:.02em;transition:transform .15s,filter .15s}
+.home:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.home:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.crumb{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.crumb i{font-style:normal;color:var(--accent);margin:0 2px}
+.foot a{color:var(--accent)}
 </style>
 </head>
 <body>
 <header class="top">
   <div>
+    <div class="brand"><a class="home" href="https://caffineaddic.github.io/" title="Saumya Roy — portfolio">SR</a><span class="crumb">caffineaddic <i>/</i> vibe-coder-bootcamp</span></div>
     <h1>Vibe Coder <span>Bootcamp</span></h1>
     <p class="sub">Python from zero to NumPy, pandas, PyTorch and attention, for ML interviews. Every exercise runs in your browser and the tests tell you what's wrong. No autocomplete, no AI.</p>
   </div>
@@ -304,7 +314,7 @@ ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
   </div>
 </div>
 
-<footer class="foot">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · Open source under the MIT license · Progress is saved in this browser only.</footer>
+<footer class="foot">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> for <a href="https://caffineaddic.github.io/">Saumya Roy</a> &amp; Mehul Goel · Practice the answers: <a href="https://caffineaddic.github.io/ml-interview-playbook/">ML Interview Playbook</a> · <a href="https://github.com/CaffineAddic/vibe-coder-bootcamp">source</a> · MIT license · Progress is saved in this browser only.</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
@@ -3677,8 +3687,13 @@ self.onmessage = async (e) => {
     $("gut").textContent = s;
     ed.style.height = "auto"; ed.style.height = ed.scrollHeight + "px";
   }
+  // Analytics: record which lessons and tabs people open (GoatCounter events, no cookies).
+  function track(path, title) {
+    try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title, event: true }); } catch (e) {}
+  }
   function go(i) {
-    saveCode(); cur = i; store.set("vcb.cur", i);
+    saveCode(); cur = i;
+    track("lesson/" + LESSONS[i].id, LESSONS[i].title); store.set("vcb.cur", i);
     const l = LESSONS[i]; hintN = 0; solStep = 0;
     $("eyebrow").textContent = l.stage + " · lesson " + (i + 1) + " of " + LESSONS.length;
     $("title").textContent = l.title;
@@ -3782,6 +3797,7 @@ self.onmessage = async (e) => {
     });
     res.hidden = false; $("out").textContent = out;
     if (pass === r.length) {
+      if (!solved[l.id]) track("solved/" + l.id, "Solved: " + l.title);
       solved[l.id] = true; store.set("vcb.solved", solved);
       const last = cur === LESSONS.length - 1;
       $("banner").innerHTML = '<div class="banner win">All ' + r.length + " tests pass." +
@@ -3852,6 +3868,7 @@ self.onmessage = async (e) => {
     $("view-course").hidden = !course; $("view-cards").hidden = course;
     $("tab-course").setAttribute("aria-selected", course); $("tab-cards").setAttribute("aria-selected", !course);
     store.set("vcb.tab", which);
+    track("tab/" + which, which === "cards" ? "Concept cards" : "Course");
   }
   $("tab-course").onclick = () => tab("course");
   $("tab-cards").onclick = () => tab("cards");
@@ -3862,5 +3879,7 @@ self.onmessage = async (e) => {
 })();
 
 </script>
+<!-- GoatCounter analytics — privacy-friendly, no cookies. Shares the portfolio's dashboard. -->
+<script data-goatcounter="https://saumyaroy.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
