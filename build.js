@@ -7,6 +7,7 @@ fs.writeFileSync("course/torchlite.js", torchDataJs("."));
 let html = read("index.html");
 html = html.replace('<link rel="stylesheet" href="style.css">', () => "<style>\n" + read("style.css") + "</style>");
 html = html.replace(/<script src="((?:course\/)?[\w-]+\.js)"><\/script>/g, (_, f) => "<script>\n" + read(f) + "\n</script>");
+html = html.replace('href="favicon.svg"', () => 'href="data:image/svg+xml;base64,' + Buffer.from(read("favicon.svg")).toString("base64") + '"');
 fs.mkdirSync("dist", { recursive: true });
 fs.writeFileSync("dist/vibe-coder-bootcamp.html", html);
 // Artifact flavor: contents only, without the document wrapper

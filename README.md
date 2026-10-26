@@ -75,6 +75,7 @@ Rules that make it work: turn off AI autocomplete, struggle for 15 minutes befor
 ```
 index.html            page shell
 style.css             styles (light and dark)
+favicon.svg           browser-tab icon
 app.js                course UI, Python runner (Pyodide worker + Skulpt fallback), concept cards
 course/
   foundations.js      Part 1
