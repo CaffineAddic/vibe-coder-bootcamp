@@ -106,6 +106,10 @@ npm run build             # regenerate torchlite.js and the single-file build
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to add lessons or cards.
 
+## Credits
+
+Made with [Claude](https://claude.ai).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
