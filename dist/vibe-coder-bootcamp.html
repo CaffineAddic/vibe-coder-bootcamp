@@ -1,0 +1,1688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vibe Coder Bootcamp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Learn to write code yourself again: Python from zero up to implementing attention, with runnable exercises and tests in the browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lesson rail on the left, workbench (brief, editor, console) on the right; rail collapses to a picker on phones */
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --ink:#18202b; --muted:#5b6676; --line:#dde2ea;
+  --accent:#2453d6; --accent-ink:#ffffff; --accent-soft:#e6ecfc;
+  --code-bg:#0f1622; --code-ink:#dfe6f2; --gutter:#5d6b82;
+  --ok:#17803d; --ok-soft:#e3f4e8; --bad:#c2352b; --bad-soft:#fbe7e5; --warn-soft:#fff4dc; --warn:#8a5a00;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d121a; --panel:#151c27; --ink:#e6ebf3; --muted:#9aa6b8; --line:#26303f;
+  --accent:#7ea0ff; --accent-ink:#0d121a; --accent-soft:#1d2a4a;
+  --code-bg:#0a0f16; --code-ink:#dfe6f2; --gutter:#56637a;
+  --ok:#5fd18a; --ok-soft:#14301f; --bad:#ff8379; --bad-soft:#3a1b19; --warn-soft:#33280f; --warn:#f2c46b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d121a; --panel:#151c27; --ink:#e6ebf3; --muted:#9aa6b8; --line:#26303f;
+  --accent:#7ea0ff; --accent-ink:#0d121a; --accent-soft:#1d2a4a;
+  --code-bg:#0a0f16; --code-ink:#dfe6f2; --gutter:#56637a;
+  --ok:#5fd18a; --ok-soft:#14301f; --bad:#ff8379; --bad-soft:#3a1b19; --warn-soft:#33280f; --warn:#f2c46b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.app{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:270px minmax(0,1fr);gap:24px;align-items:start}
+header.top{max-width:1280px;margin:0 auto 18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.6rem,3vw,2.2rem);margin:0;letter-spacing:-.02em;line-height:1.1}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:.25rem 0 0;max-width:60ch}
+.progress{min-width:220px;flex:0 1 300px}
+.progress .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress .bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
+.progress small{color:var(--muted);font-variant-numeric:tabular-nums}
+nav.rail{position:sticky;top:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;max-height:calc(100vh - 32px);overflow:auto}
+.stage{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:14px 8px 4px;font-weight:700}
+.stage:first-child{margin-top:4px}
+nav button.l{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:.95rem}
+nav button.l:hover{background:var(--accent-soft)}
+nav button.l:focus-visible{outline:2px solid var(--accent)}
+nav button.l[aria-current="true"]{background:var(--accent);color:var(--accent-ink)}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:11px;font-weight:700}
+.done .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+nav button.l[aria-current="true"] .dot{border-color:var(--accent-ink)}
+select.picker{display:none;width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+main{display:grid;gap:16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);font-weight:700}
+h2{font-family:var(--f-display);font-size:1.7rem;margin:.1rem 0 .6rem;letter-spacing:-.01em;text-wrap:balance}
+.why{background:var(--accent-soft);border-radius:8px;padding:10px 14px;margin:0 0 12px;font-size:.95rem}
+.why b{color:var(--accent)}
+.task{margin:0;max-width:72ch}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+.work{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+.editor-wrap{background:var(--code-bg);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ed-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;color:var(--gutter);font-family:var(--f-mono);font-size:.78rem;border-bottom:1px solid #1e2836}
+.ed{display:flex;min-height:340px;overflow:auto}
+.gut{padding:12px 8px 12px 12px;color:var(--gutter);font-family:var(--f-mono);font-size:14px;line-height:1.6;text-align:right;user-select:none;white-space:pre}
+textarea#code{flex:1;min-width:0;border:0;outline:0;resize:none;background:transparent;color:var(--code-ink);font-family:var(--f-mono);font-size:14px;line-height:1.6;padding:12px 12px 12px 4px;tab-size:4;white-space:pre;overflow:hidden;min-height:340px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid #1e2836}
+.btn{font:inherit;font-weight:700;font-size:.9rem;border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid transparent}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--code-ink);border-color:#2b3647}
+.btn.ghost:hover{background:#1a2333}
+.btn.plain{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.btn.plain:hover{background:var(--accent-soft)}
+.kbd{font-family:var(--f-mono);font-size:.72rem;opacity:.7;margin-left:4px}
+.side{display:grid;gap:16px;align-content:start;min-width:0}
+.console{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:0}
+.console h3,.helper h3{font-family:var(--f-display);font-size:1rem;margin:0;padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+#out{margin:0;padding:12px 16px;font-family:var(--f-mono);font-size:13px;white-space:pre-wrap;word-break:break-word;min-height:120px;max-height:320px;overflow:auto}
+.res{display:grid;gap:6px;padding:12px 16px}
+.res div{padding:6px 10px;border-radius:6px;font-size:.9rem}
+.res .p{background:var(--ok-soft);color:var(--ok)}
+.res .f{background:var(--bad-soft);color:var(--bad)}
+.banner{margin:0 16px 12px;padding:10px 12px;border-radius:8px;font-weight:700}
+.banner.win{background:var(--ok-soft);color:var(--ok)}
+.err{color:var(--bad)}
+details{border-top:1px solid var(--line)}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;padding:12px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--muted)}
+details[open] summary::after{content:"−"}
+summary:focus-visible{outline:2px solid var(--accent)}
+.dbody{padding:0 16px 14px}
+pre.pc{margin:0;background:var(--code-bg);color:var(--code-ink);padding:12px;border-radius:8px;font-family:var(--f-mono);font-size:13px;overflow-x:auto;line-height:1.55}
+ol.hints{margin:0;padding-left:20px;display:grid;gap:6px}
+.note{color:var(--muted);font-size:.88rem;margin:0 0 10px}
+.warnbox{background:var(--warn-soft);color:var(--warn);padding:10px 12px;border-radius:8px;font-size:.9rem;margin-bottom:10px}
+.timer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.timer b{font-family:var(--f-mono);font-size:1.3rem;font-variant-numeric:tabular-nums}
+.timer b.over{color:var(--bad)}
+.method{margin:0;padding-left:20px;display:grid;gap:4px;font-size:.93rem}
+.loading{color:var(--muted)}
+@media (max-width:1000px){.work{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.app{grid-template-columns:minmax(0,1fr)}nav.rail{display:none}select.picker{display:block}h2{font-size:1.4rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:700;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.part{font-family:var(--f-display);font-size:.95rem;font-weight:700;margin:16px 8px 2px;color:var(--ink)}
+.part:first-child{margin-top:2px}
+.learn{max-width:72ch}
+.learn p,.learn ul{margin:0 0 .7rem}
+.learn ul{padding-left:20px}
+.learn pre{background:var(--code-bg);color:var(--code-ink);padding:10px 12px;border-radius:8px;font-family:var(--f-mono);font-size:13px;overflow-x:auto}
+.example{margin-top:12px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.example .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--accent-soft);font-weight:700;font-size:.85rem;gap:8px;flex-wrap:wrap}
+.example pre{margin:0;border-radius:0}
+.example .exout{margin:0;padding:10px 12px;font-family:var(--f-mono);font-size:13px;white-space:pre-wrap;border-top:1px solid var(--line);background:var(--panel)}
+.divider{height:1px;background:var(--line);margin:16px 0}
+.yourturn{font-family:var(--f-display);font-size:1.1rem;margin:0 0 .4rem}
+.cards-wrap{max-width:820px;margin:0 auto;display:grid;gap:16px}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.85rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.flash{min-height:260px;display:flex;flex-direction:column;gap:14px}
+.flash .q{font-family:var(--f-display);font-size:1.45rem;line-height:1.25;text-wrap:balance;margin:0}
+.flash .a{background:var(--accent-soft);border-radius:10px;padding:14px 16px;margin:0;max-width:70ch}
+.flash .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.good{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.btn.again{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.tally{color:var(--muted);font-size:.9rem}
+.foot{max-width:1280px;margin:32px auto 0;color:var(--muted);font-size:.85rem}
+.foot a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Vibe Coder <span>Bootcamp</span></h1>
+    <p class="sub">Python from zero up to writing attention by hand, for ML interviews. Every exercise runs in your browser and the tests tell you what's wrong. No autocomplete, no AI.</p>
+  </div>
+  <div class="progress" aria-live="polite">
+    <div class="bar"><i id="pbar"></i></div>
+    <small id="ptext"></small>
+  </div>
+</header>
+<div class="foot" style="margin:0 auto 16px">
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-course" aria-selected="true">Course</button>
+    <button class="tab" role="tab" id="tab-cards" aria-selected="false">Concept cards</button>
+  </div>
+</div>
+
+<div class="app" id="view-course">
+  <nav class="rail" id="rail" aria-label="Lessons"></nav>
+  <main>
+    <select class="picker" id="picker" aria-label="Choose a lesson"></select>
+    <section class="card">
+      <div class="eyebrow" id="eyebrow"></div>
+      <h2 id="title"></h2>
+      <div id="learnbox" hidden>
+        <div class="learn" id="learn"></div>
+        <div class="example">
+          <div class="bar"><span>Example</span><button class="btn plain" id="runex">Run example</button></div>
+          <pre class="pc" id="example"></pre>
+          <pre class="exout" id="exout" hidden></pre>
+        </div>
+        <div class="divider"></div>
+        <p class="yourturn">Your turn</p>
+      </div>
+      <p class="why"><b>Why it matters:</b> <span id="why"></span></p>
+      <p class="task" id="task"></p>
+    </section>
+    <div class="work">
+      <div class="editor-wrap">
+        <div class="ed-bar"><span>solution.py</span><span id="status" class="loading">Loading Python…</span></div>
+        <div class="ed"><div class="gut" id="gut">1</div><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Code editor"></textarea></div>
+        <div class="actions">
+          <button class="btn primary" id="check">Run tests<span class="kbd">Ctrl+Enter</span></button>
+          <button class="btn ghost" id="run">Run only</button>
+          <button class="btn ghost" id="reset">Reset code</button>
+        </div>
+      </div>
+      <div class="side">
+        <div class="console">
+          <h3>Output</h3>
+          <div id="banner"></div>
+          <div class="res" id="res" hidden></div>
+          <pre id="out"></pre>
+        </div>
+        <div class="console helper">
+          <details id="d-pseudo"><summary>Pseudocode</summary><div class="dbody"><p class="note">Try to plan it yourself before opening this.</p><pre class="pc" id="pseudo"></pre></div></details>
+          <details id="d-hints"><summary>Hints <span id="hcount" style="color:var(--muted);font-weight:400"></span></summary><div class="dbody"><ol class="hints" id="hints"></ol><p style="margin:10px 0 0"><button class="btn plain" id="morehint">Show next hint</button></p></div></details>
+          <details id="d-sol"><summary>Solution</summary><div class="dbody" id="solbody"></div></details>
+        </div>
+        <div class="card">
+          <h3 style="font-family:var(--f-display);margin:0 0 8px;font-size:1rem">Interview timer</h3>
+          <div class="timer"><b id="tclock">20:00</b><button class="btn plain" id="tstart">Start</button><button class="btn plain" id="treset">Reset</button></div>
+          <h3 style="font-family:var(--f-display);margin:16px 0 6px;font-size:1rem">When you freeze</h3>
+          <ol class="method">
+            <li>Say the inputs, outputs and their shapes out loud.</li>
+            <li>Work one tiny example by hand.</li>
+            <li>Write the function signature and a comment per step.</li>
+            <li>Fill in each comment with code.</li>
+            <li>Test on your example, then edge cases.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="view-cards" hidden>
+  <div class="cards-wrap">
+    <div class="filters" id="filters"></div>
+    <section class="card flash">
+      <div class="meta"><span id="ctopic"></span><span id="cpos"></span></div>
+      <p class="q" id="cq"></p>
+      <p class="a" id="ca" hidden></p>
+      <div class="row" id="cbtns"></div>
+    </section>
+    <p class="tally" id="ctally"></p>
+    <p class="note">Answer out loud as if an interviewer asked, in two or three sentences, before you reveal. Cards you mark "Review again" come back first.</p>
+  </div>
+</div>
+
+<footer class="foot">Open source under the MIT license. Progress is saved in this browser only.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script>
+// Test helpers appended after the learner's code. check() records a result; close() compares floats.
+const HARNESS = "\n_results = []\ndef check(cond, msg):\n    _results.append((bool(cond), msg))\ndef close(a, b, tol=1e-5):\n    return abs(a - b) < tol\n";
+
+</script>
+<script>
+// Part 1: Foundations. Each lesson teaches one idea, shows a runnable example, then asks you to write code.
+// Fields: stage, id, title, learn (HTML), example (runnable Python), why, task, pseudo, hints[], starter, solution, tests
+const FOUNDATION_LESSONS = [
+{stage:"1 · Values and names", id:"variables", title:"Variables and types",
+learn:`<p>A <b>variable</b> is a name that points at a value. You create one with <code>=</code>. Python works out the type on its own.</p>
+<p>The four types you'll use constantly:</p>
+<ul><li><code>int</code>: whole numbers, like <code>3</code></li><li><code>float</code>: decimals, like <code>0.01</code> (a learning rate)</li><li><code>str</code>: text, like <code>"cat"</code></li><li><code>bool</code>: <code>True</code> or <code>False</code></li></ul>
+<p><code>/</code> always gives a float (<code>7 / 2 == 3.5</code>). <code>//</code> divides and drops the remainder (<code>7 // 2 == 3</code>). <code>%</code> gives the remainder (<code>7 % 2 == 1</code>). <code>**</code> is power (<code>2 ** 3 == 8</code>).</p>
+<p><code>print()</code> shows a value. <code>type()</code> tells you what kind of value it is. When you're confused, print things.</p>`,
+example:`lr = 0.01
+epochs = 10
+name = "model_v1"
+print(type(lr), type(epochs), type(name))
+print(7 / 2, 7 // 2, 7 % 2, 2 ** 3)
+print("steps:", epochs * 100)`,
+why:"Nothing works until you can store a value, do math on it and print it to check yourself.",
+task:"Write <code>average3(a, b, c)</code> that returns the average of three numbers.",
+pseudo:`return (a + b + c) / 3`,
+hints:["Add first, then divide. Parentheses control the order.","Use /, not //, so you keep the decimals."],
+starter:`def average3(a, b, c):
+    # replace pass with your code
+    pass
+`,
+solution:`def average3(a, b, c):
+    return (a + b + c) / 3
+`,
+tests:`check(average3(1, 2, 3) == 2, "average3(1, 2, 3) should be 2")
+check(close(average3(1, 2, 2), 1.6666667), "average3(1, 2, 2) should be about 1.667")`},
+
+{stage:"1 · Values and names", id:"functions", title:"Functions and return",
+learn:`<p>A <b>function</b> is a named, reusable piece of code. <code>def</code> starts it, the names in brackets are its <b>parameters</b>, and the indented block is its body.</p>
+<p><code>return</code> sends a value back and ends the function. A function with no <code>return</code> gives back <code>None</code>. Printing a value is <b>not</b> the same as returning it. This is the most common beginner bug.</p>
+<p>Parameters can have defaults: <code>def step(w, lr=0.1)</code> lets you call <code>step(w)</code> or <code>step(w, 0.5)</code>.</p>
+<p>Indentation is part of the syntax. Use 4 spaces. Everything indented under the <code>def</code> belongs to it.</p>`,
+example:`def double(x):
+    return x * 2
+
+def say_double(x):
+    print(x * 2)   # prints, but returns None
+
+a = double(5)
+b = say_double(5)
+print("a =", a, "| b =", b)`,
+why:"Every interview answer is a function. You need to write def, parameters and return without thinking.",
+task:"Write <code>sgd_update(w, grad, lr=0.1)</code> that returns the new weight: <code>w − lr × grad</code>.",
+pseudo:`return w - lr * grad`,
+hints:["The default value goes in the def line: lr=0.1.","Return the value. Don't print it."],
+starter:`def sgd_update(w, grad, lr=0.1):
+    pass
+`,
+solution:`def sgd_update(w, grad, lr=0.1):
+    return w - lr * grad
+`,
+tests:`check(close(sgd_update(1.0, 2.0), 0.8), "1.0 - 0.1*2.0 = 0.8")
+check(close(sgd_update(1.0, 2.0, lr=0.5), 0.0), "custom lr works")
+check(sgd_update(1.0, 2.0) is not None, "the function must return, not print")`},
+
+{stage:"2 · Control flow", id:"conditions", title:"if, elif, else",
+learn:`<p><code>if</code> runs a block only when its condition is <code>True</code>. <code>elif</code> checks another condition if the first failed. <code>else</code> catches everything left.</p>
+<p>Comparisons: <code>==</code> (equal), <code>!=</code> (not equal), <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>. Combine them with <code>and</code>, <code>or</code>, <code>not</code>.</p>
+<p>Python checks the branches top to bottom and runs only the first one that matches, so order matters.</p>`,
+example:`loss = 0.42
+if loss < 0.1:
+    print("great")
+elif loss < 0.5:
+    print("ok")
+else:
+    print("keep training")`,
+why:"Clipping, early stopping, masks and edge cases are all if-statements.",
+task:"Write <code>clip(x, lo, hi)</code> that returns <code>lo</code> if x is below lo, <code>hi</code> if x is above hi, and x otherwise. (Gradient clipping works like this.)",
+pseudo:`if x < lo: return lo
+elif x > hi: return hi
+else: return x`,
+hints:["Three cases, so if / elif / else.","You can return inside each branch."],
+starter:`def clip(x, lo, hi):
+    pass
+`,
+solution:`def clip(x, lo, hi):
+    if x < lo:
+        return lo
+    elif x > hi:
+        return hi
+    return x
+`,
+tests:`check(clip(5, 0, 1) == 1, "5 clipped to [0,1] is 1")
+check(clip(-2, 0, 1) == 0, "-2 clipped to [0,1] is 0")
+check(clip(0.3, 0, 1) == 0.3, "values inside the range are unchanged")`},
+
+{stage:"2 · Control flow", id:"loops", title:"for and while loops",
+learn:`<p>A <code>for</code> loop runs once per item: <code>for x in xs:</code>. To loop over numbers, use <code>range</code>: <code>range(5)</code> is 0,1,2,3,4 and <code>range(2, 10, 2)</code> is 2,4,6,8.</p>
+<p>The <b>accumulator pattern</b> shows up everywhere: make a variable before the loop, update it inside, use it after.</p>
+<p><code>enumerate(xs)</code> gives you the index and the item together. <code>zip(a, b)</code> walks two lists side by side.</p>
+<p>A <code>while</code> loop runs as long as a condition is true. Make sure something inside changes the condition, or it never stops.</p>`,
+example:`losses = [0.9, 0.6, 0.4]
+total = 0
+for i, loss in enumerate(losses):
+    total += loss
+    print("epoch", i, "loss", loss)
+print("sum", total)
+
+for a, b in zip([1, 2], [10, 20]):
+    print(a + b)`,
+why:"Sums, means, dot products and training loops are all loops with an accumulator.",
+task:"Write <code>total(xs)</code> that returns the sum of a list without using the built-in <code>sum()</code>.",
+pseudo:`running = 0
+for each x in xs:
+    running = running + x
+return running`,
+hints:["Start a variable at 0 before the loop.","Return after the loop, not inside it. Watch your indentation."],
+starter:`def total(xs):
+    pass
+`,
+solution:`def total(xs):
+    running = 0
+    for x in xs:
+        running += x
+    return running
+`,
+tests:`check(total([1, 2, 3]) == 6, "total([1,2,3]) should be 6")
+check(total([]) == 0, "an empty list sums to 0")
+check(close(total([0.5, 0.25]), 0.75), "works with floats")`},
+
+{stage:"3 · Collections", id:"lists", title:"Lists, indexing and slicing",
+learn:`<p>A <b>list</b> holds items in order: <code>xs = [3, 1, 4]</code>. Indexes start at 0. <code>xs[-1]</code> is the last item.</p>
+<p><b>Slicing</b> takes a piece: <code>xs[a:b]</code> runs from index a up to <i>but not including</i> b. <code>xs[:2]</code> is the first two, <code>xs[-2:]</code> the last two, <code>xs[::-1]</code> reversed.</p>
+<p>Useful tools: <code>len(xs)</code>, <code>xs.append(v)</code>, <code>max</code>, <code>min</code>, <code>sorted(xs)</code> (new list) and <code>xs.sort()</code> (in place).</p>
+<p>Lists are <b>mutable</b>. If two names point at the same list, changing it through one changes it for both. Use <code>xs.copy()</code> or <code>xs[:]</code> when you need a separate copy.</p>`,
+example:`xs = [10, 20, 30, 40, 50]
+print(xs[0], xs[-1], xs[1:3], xs[::-1])
+a = [1, 2]
+b = a          # same list
+c = a.copy()   # separate list
+a.append(3)
+print(b, c)`,
+why:"Train/test splits, windows of tokens and batches are all slicing.",
+task:"Write <code>split(data, frac)</code> that returns <code>(train, test)</code>: the first <code>int(len(data) * frac)</code> items, then the rest.",
+pseudo:`cut = int(len(data) * frac)
+return data[:cut], data[cut:]`,
+hints:["int() rounds down to a whole number.","You can return two values separated by a comma. That makes a tuple."],
+starter:`def split(data, frac):
+    pass
+`,
+solution:`def split(data, frac):
+    cut = int(len(data) * frac)
+    return data[:cut], data[cut:]
+`,
+tests:`tr, te = split([1, 2, 3, 4, 5], 0.8)
+check(tr == [1, 2, 3, 4] and te == [5], "80/20 split of 5 items")
+tr, te = split([1, 2, 3], 0.5)
+check(tr == [1] and te == [2, 3], "int() rounds 1.5 down to 1")`},
+
+{stage:"3 · Collections", id:"strings", title:"Strings",
+learn:`<p>Strings are text. They behave a lot like lists of characters: <code>s[0]</code>, <code>len(s)</code> and slicing all work. Unlike lists, they can't be changed in place. Methods return new strings.</p>
+<p>Methods you'll use: <code>.lower()</code>, <code>.strip()</code> (trim spaces), <code>.split()</code> (string to list of words), <code>" ".join(words)</code> (list back to string), <code>.replace(a, b)</code>, <code>.startswith()</code>.</p>
+<p>f-strings put values into text: <code>f"loss={loss:.3f}"</code>.</p>`,
+example:`s = "  The Cat SAT  "
+clean = s.strip().lower()
+words = clean.split()
+print(clean, words, len(words))
+print("-".join(words))
+loss = 0.123456
+print(f"loss={loss:.3f}")`,
+why:"Text preprocessing and tokenization are string work, and they come up in NLP-flavored interviews.",
+task:"Write <code>normalize(text)</code> that lowercases the text, removes the characters <code>. , ! ?</code>, and collapses any run of spaces to a single space with no leading or trailing spaces.",
+pseudo:`t = text.lower()
+for ch in ".,!?":
+    t = t.replace(ch, "")
+return " ".join(t.split())`,
+hints:["Loop over the string \".,!?\" and replace each character with \"\".","split() with no argument splits on any run of whitespace, and join puts single spaces back."],
+starter:`def normalize(text):
+    pass
+`,
+solution:`def normalize(text):
+    t = text.lower()
+    for ch in ".,!?":
+        t = t.replace(ch, "")
+    return " ".join(t.split())
+`,
+tests:`check(normalize("Hello, World!") == "hello world", "lowercase and drop punctuation")
+check(normalize("  a   b  ") == "a b", "collapse spaces")
+check(normalize("") == "", "empty stays empty")`},
+
+{stage:"3 · Collections", id:"dicts", title:"Dictionaries and sets",
+learn:`<p>A <b>dict</b> maps keys to values: <code>vocab = {"cat": 0, "dog": 1}</code>. Look up with <code>vocab["cat"]</code>. A missing key raises <code>KeyError</code>, so use <code>vocab.get(k, default)</code> when it might not be there.</p>
+<p>Loop with <code>for k, v in d.items():</code>. Check membership with <code>k in d</code>.</p>
+<p>A <b>set</b> holds unique items with no order: <code>set([1, 1, 2])</code> is <code>{1, 2}</code>.</p>
+<p>The big idea: looking something up in a dict or set takes about the same time however large it is (O(1)). Searching a list means checking every item (O(n)). Interviewers often want you to swap a list search for a dict or set.</p>`,
+example:`counts = {}
+for w in "a b a c a".split():
+    counts[w] = counts.get(w, 0) + 1
+print(counts)
+for k, v in counts.items():
+    print(k, v)
+print(set([3, 1, 3, 2]))`,
+why:"Vocabularies, label maps, counting and caching are all dicts.",
+task:"Write <code>label_map(labels)</code> that returns a dict from each distinct label to an id, with ids assigned in <b>sorted</b> label order starting at 0.",
+pseudo:`unique = sorted(set(labels))
+return {label: i for i, label in enumerate(unique)}`,
+hints:["set() removes duplicates, sorted() orders them and gives back a list.","enumerate gives you (index, item) pairs."],
+starter:`def label_map(labels):
+    pass
+`,
+solution:`def label_map(labels):
+    unique = sorted(set(labels))
+    return {lab: i for i, lab in enumerate(unique)}
+`,
+tests:`check(label_map(["dog", "cat", "dog", "bird"]) == {"bird": 0, "cat": 1, "dog": 2}, "sorted labels get ids 0,1,2")
+check(label_map([]) == {}, "no labels gives an empty dict")`},
+
+{stage:"3 · Collections", id:"comprehensions", title:"List comprehensions",
+learn:`<p>A <b>comprehension</b> builds a list in one line: <code>[x * 2 for x in xs]</code> is the same as a loop that appends <code>x * 2</code> each time.</p>
+<p>Add a filter at the end: <code>[x for x in xs if x &gt; 0]</code>.</p>
+<p>They nest, which is how you build a matrix: <code>[[0] * cols for _ in range(rows)]</code>. Don't write <code>[[0] * cols] * rows</code>. That repeats the same inner list, so changing one row changes all of them.</p>
+<p>Dict comprehensions work the same way: <code>{w: i for i, w in enumerate(words)}</code>.</p>`,
+example:`xs = [-2, -1, 0, 1, 2]
+print([x * x for x in xs])
+print([x for x in xs if x > 0])
+grid = [[0] * 3 for _ in range(2)]
+grid[0][0] = 9
+print(grid)
+bad = [[0] * 3] * 2
+bad[0][0] = 9
+print(bad, "<- both rows changed")`,
+why:"Interviewers read comprehensions as a sign of fluency, and ML code is full of them.",
+task:"Write <code>relu_all(xs)</code> that returns a new list with every negative value replaced by 0. Use one comprehension.",
+pseudo:`return [x if x > 0 else 0 for x in xs]`,
+hints:["An if/else in the value part goes before the for: [a if cond else b for x in xs].","max(0, x) also works."],
+starter:`def relu_all(xs):
+    pass
+`,
+solution:`def relu_all(xs):
+    return [max(0, x) for x in xs]
+`,
+tests:`check(relu_all([-1, 2, -3, 4]) == [0, 2, 0, 4], "negatives become 0")
+check(relu_all([]) == [], "empty in, empty out")`},
+
+{stage:"4 · Writing solid code", id:"errors", title:"Errors and exceptions",
+learn:`<p>When something goes wrong, Python <b>raises</b> an exception: <code>ZeroDivisionError</code>, <code>KeyError</code>, <code>IndexError</code>, <code>TypeError</code>, <code>ValueError</code>. The last line of the error message tells you which one and roughly why. Read it before anything else.</p>
+<p>Catch errors you expect with <code>try</code> / <code>except</code>. Raise your own with <code>raise ValueError("message")</code> when input is invalid. Interviewers like seeing you check shapes and raise a clear error.</p>
+<p><code>assert cond, "message"</code> is a quick sanity check that raises if cond is false.</p>`,
+example:`def safe_div(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return 0.0
+
+print(safe_div(1, 2), safe_div(1, 0))
+try:
+    [1, 2][5]
+except IndexError as e:
+    print("caught:", e)`,
+why:"Handling bad input and shape mismatches is how you show you write real code, not just happy-path code.",
+task:"Write <code>check_shape(M, rows, cols)</code> that raises <code>ValueError</code> if matrix M (a list of rows) isn't exactly rows × cols, and returns <code>True</code> if it is.",
+pseudo:`if len(M) != rows: raise ValueError
+for each row in M:
+    if len(row) != cols: raise ValueError
+return True`,
+hints:["Check the number of rows first, then each row's length.","raise ValueError(\"expected ...\") with a helpful message."],
+starter:`def check_shape(M, rows, cols):
+    pass
+`,
+solution:`def check_shape(M, rows, cols):
+    if len(M) != rows:
+        raise ValueError("expected %d rows, got %d" % (rows, len(M)))
+    for r in M:
+        if len(r) != cols:
+            raise ValueError("expected %d cols" % cols)
+    return True
+`,
+tests:`check(check_shape([[1, 2], [3, 4]], 2, 2) == True, "a 2x2 matrix passes")
+bad = 0
+for M, r, c in [([[1, 2]], 2, 2), ([[1, 2], [3]], 2, 2)]:
+    try:
+        check_shape(M, r, c)
+    except ValueError:
+        bad += 1
+check(bad == 2, "wrong row count and ragged rows both raise ValueError")`},
+
+{stage:"4 · Writing solid code", id:"classes", title:"Classes and objects",
+learn:`<p>A <b>class</b> bundles data and the functions that work on it. It's a blueprint. Each <b>object</b> made from it has its own data.</p>
+<p><code>__init__</code> runs when you create an object. It stores values on <code>self</code>. Every method takes <code>self</code> as its first parameter, and you read stored values as <code>self.name</code>.</p>
+<p>This is the exact shape of PyTorch modules: store parameters in <code>__init__</code>, compute in <code>forward</code>. When you freeze, write this skeleton first:</p>
+<pre>class Thing:
+    def __init__(self, ...):
+        self.x = ...
+    def method(self, ...):
+        return ...</pre>`,
+example:`class Counter:
+    def __init__(self):
+        self.n = 0
+    def add(self, k=1):
+        self.n += k
+        return self.n
+
+a = Counter()
+b = Counter()
+a.add(); a.add(5)
+print(a.n, b.n)  # separate objects, separate data`,
+why:"The question you froze on was 'implement this in a class'. This is the skeleton.",
+task:"Write a class <code>RunningMean</code> with <code>update(x)</code>, which records a new value, and <code>value()</code>, which returns the mean of everything seen so far (0.0 if nothing yet). Store only a total and a count, not the whole list.",
+pseudo:`__init__: self.total = 0; self.count = 0
+update(x): total += x; count += 1
+value(): return total / count if count else 0.0`,
+hints:["Two attributes in __init__: self.total and self.count.","Guard the division when count is 0.","Training loops track the average loss exactly like this."],
+starter:`class RunningMean:
+    def __init__(self):
+        pass
+
+    def update(self, x):
+        pass
+
+    def value(self):
+        pass
+`,
+solution:`class RunningMean:
+    def __init__(self):
+        self.total = 0.0
+        self.count = 0
+
+    def update(self, x):
+        self.total += x
+        self.count += 1
+
+    def value(self):
+        return self.total / self.count if self.count else 0.0
+`,
+tests:`m = RunningMean()
+check(m.value() == 0.0, "empty mean is 0.0")
+for x in [1, 2, 3, 4]:
+    m.update(x)
+check(close(m.value(), 2.5), "mean of 1..4 is 2.5")
+m2 = RunningMean()
+check(m2.value() == 0.0, "a second object has its own state")`},
+
+{stage:"4 · Writing solid code", id:"recursion", title:"Recursion",
+learn:`<p>A <b>recursive</b> function calls itself on a smaller version of the problem. Every recursive function needs two parts:</p>
+<ul><li>a <b>base case</b> that answers directly and stops the recursion</li><li>a <b>recursive case</b> that shrinks the problem and calls itself</li></ul>
+<p>Without a base case, it never stops and you get a <code>RecursionError</code>. Trees, nested lists and divide-and-conquer algorithms are natural fits.</p>`,
+example:`def factorial(n):
+    if n <= 1:          # base case
+        return 1
+    return n * factorial(n - 1)  # smaller problem
+
+print(factorial(5))`,
+why:"Nested data (JSON configs, model parameter trees) and tree questions both use recursion.",
+task:"Write <code>flatten(xs)</code> that turns an arbitrarily nested list into a flat list, keeping order. <code>[1, [2, [3]], 4]</code> becomes <code>[1, 2, 3, 4]</code>.",
+pseudo:`out = []
+for item in xs:
+    if item is a list: out.extend(flatten(item))
+    else: out.append(item)
+return out`,
+hints:["isinstance(item, list) tells you whether something is a list.","extend adds every element of a list. append adds one item."],
+starter:`def flatten(xs):
+    pass
+`,
+solution:`def flatten(xs):
+    out = []
+    for item in xs:
+        if isinstance(item, list):
+            out.extend(flatten(item))
+        else:
+            out.append(item)
+    return out
+`,
+tests:`check(flatten([1, [2, [3]], 4]) == [1, 2, 3, 4], "nested list flattens in order")
+check(flatten([[[]]]) == [], "nested empties give []")
+check(flatten([1, 2]) == [1, 2], "an already-flat list is unchanged")`},
+
+{stage:"4 · Writing solid code", id:"bigo", title:"Big-O and choosing data structures",
+learn:`<p><b>Big-O</b> describes how running time grows with input size n. You'll be asked for it after almost every answer.</p>
+<ul><li><b>O(1)</b>: constant. Dict or set lookup, list index.</li><li><b>O(log n)</b>: halve each step. Binary search.</li><li><b>O(n)</b>: one pass. A loop over the list.</li><li><b>O(n log n)</b>: sorting.</li><li><b>O(n²)</b>: a loop inside a loop. Comparing all pairs. Attention over a sequence of length n.</li></ul>
+<p>Rule of thumb: count nested loops over the input. To speed up an O(n²) "have I seen this?" search, remember what you've seen in a set, and it becomes O(n).</p>`,
+example:`def has_dup_slow(xs):          # O(n^2)
+    for i in range(len(xs)):
+        for j in range(i + 1, len(xs)):
+            if xs[i] == xs[j]:
+                return True
+    return False
+
+print(has_dup_slow([3, 1, 4, 1]))`,
+why:"\"What's the complexity?\" follows nearly every coding answer, including attention (O(n²) in sequence length).",
+task:"Write <code>has_duplicates(xs)</code> in <b>O(n)</b> using a set.",
+pseudo:`seen = empty set
+for x in xs:
+    if x in seen: return True
+    seen.add(x)
+return False`,
+hints:["Checking x in a set is O(1).","One loop, so O(n) overall."],
+starter:`def has_duplicates(xs):
+    pass
+`,
+solution:`def has_duplicates(xs):
+    seen = set()
+    for x in xs:
+        if x in seen:
+            return True
+        seen.add(x)
+    return False
+`,
+tests:`check(has_duplicates([3, 1, 4, 1]) == True, "finds the repeated 1")
+check(has_duplicates([1, 2, 3]) == False, "no duplicates")
+big = list(range(200000))
+check(has_duplicates(big) == False, "fast on 200,000 items")`},
+
+{stage:"4 · Writing solid code", id:"binsearch", title:"Binary search",
+learn:`<p>Binary search finds a value in a <b>sorted</b> list in O(log n) by repeatedly checking the middle and throwing away the half that can't contain the answer.</p>
+<p>Keep two pointers, <code>lo</code> and <code>hi</code>. Loop while <code>lo &lt;= hi</code>. The classic bugs are off-by-one errors in the pointer updates, so set <code>lo = mid + 1</code> or <code>hi = mid - 1</code>, never just <code>mid</code>.</p>`,
+example:`xs = [1, 3, 5, 7, 9, 11]
+lo, hi = 0, len(xs) - 1
+while lo <= hi:
+    mid = (lo + hi) // 2
+    print("checking index", mid, "value", xs[mid])
+    if xs[mid] == 9: print("found"); break
+    if xs[mid] < 9: lo = mid + 1
+    else: hi = mid - 1`,
+why:"A classic warm-up question. It also shows up in threshold tuning and searching sorted scores.",
+task:"Write <code>bsearch(xs, target)</code> that returns the index of target in sorted list xs, or -1 if it isn't there.",
+pseudo:`lo, hi = 0, len(xs) - 1
+while lo <= hi:
+    mid = (lo + hi) // 2
+    if xs[mid] == target: return mid
+    if xs[mid] < target: lo = mid + 1
+    else: hi = mid - 1
+return -1`,
+hints:["Use // for the middle so it's an integer.","If the middle is too small, the answer must be to the right."],
+starter:`def bsearch(xs, target):
+    pass
+`,
+solution:`def bsearch(xs, target):
+    lo, hi = 0, len(xs) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if xs[mid] == target:
+            return mid
+        if xs[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1
+`,
+tests:`xs = [1, 3, 5, 7, 9, 11]
+check(bsearch(xs, 9) == 4, "9 is at index 4")
+check(bsearch(xs, 1) == 0 and bsearch(xs, 11) == 5, "finds both ends")
+check(bsearch(xs, 4) == -1, "missing value gives -1")
+check(bsearch([], 1) == -1, "empty list gives -1")`},
+];
+
+</script>
+<script>
+// Part 2: ML coding. The from-scratch implementations ML interviews ask for, in plain Python.
+const ML_LESSONS = [
+{stage:"5 · ML warm-up", id:"argmax", title:"Argmax",
+why:"A classifier outputs a score per class. The predicted class is the index of the largest score.",
+task:"Write <code>argmax(xs)</code> that returns the <b>index</b> of the largest value. If there's a tie, return the first one.",
+pseudo:`best_i = 0
+for i from 1 to len(xs)-1:
+    if xs[i] > xs[best_i]:
+        best_i = i
+return best_i`,
+hints:["Track the index, not the value.","range(1, len(xs)) gives you every index after the first.","Use > (not >=) so ties keep the earlier index."],
+starter:`def argmax(xs):
+    pass
+`,
+solution:`def argmax(xs):
+    best_i = 0
+    for i in range(1, len(xs)):
+        if xs[i] > xs[best_i]:
+            best_i = i
+    return best_i
+`,
+tests:`check(argmax([0.1, 0.7, 0.2]) == 1, "argmax([0.1,0.7,0.2]) should be 1")
+check(argmax([5]) == 0, "single element")
+check(argmax([3, 9, 9]) == 1, "ties return the first index")
+check(argmax([-5, -1, -3]) == 1, "works with negatives")`},
+
+{stage:"5 · ML warm-up", id:"word_counts", title:"Count tokens",
+why:"Building a vocabulary for a text model starts with counting how often each token appears.",
+task:"Write <code>count_tokens(text)</code> that lowercases the text, splits on whitespace, and returns a dict of token → count.",
+pseudo:`counts = empty dict
+for each word in text.lower().split():
+    counts[word] = counts.get(word, 0) + 1
+return counts`,
+hints:["text.lower().split() gives you a list of words.","dict.get(key, 0) returns 0 when the key isn't there yet."],
+starter:`def count_tokens(text):
+    pass
+`,
+solution:`def count_tokens(text):
+    counts = {}
+    for w in text.lower().split():
+        counts[w] = counts.get(w, 0) + 1
+    return counts
+`,
+tests:`r = count_tokens("The cat saw the dog")
+check(r["the"] == 2, "'the' appears twice (case-insensitive)")
+check(r["cat"] == 1, "'cat' appears once")
+check(len(r) == 4, "there should be 4 distinct tokens")
+check(count_tokens("") == {}, "empty text gives an empty dict")`},
+
+{stage:"5 · ML warm-up", id:"vocab", title:"Token ids",
+why:"Models eat numbers, not strings. You map each token to an integer id, then encode sentences as lists of ids.",
+task:"Write <code>build_vocab(tokens)</code> that gives each <b>new</b> token the next id, starting at 0, in order of first appearance. Then write <code>encode(tokens, vocab)</code> that returns the list of ids.",
+pseudo:`vocab = {}
+for t in tokens:
+    if t not in vocab:
+        vocab[t] = len(vocab)
+
+encode: [vocab[t] for t in tokens]`,
+hints:["len(vocab) is exactly the next unused id.","A list comprehension makes encode one line."],
+starter:`def build_vocab(tokens):
+    pass
+
+def encode(tokens, vocab):
+    pass
+`,
+solution:`def build_vocab(tokens):
+    vocab = {}
+    for t in tokens:
+        if t not in vocab:
+            vocab[t] = len(vocab)
+    return vocab
+
+def encode(tokens, vocab):
+    return [vocab[t] for t in tokens]
+`,
+tests:`v = build_vocab(["a", "b", "a", "c"])
+check(v == {"a": 0, "b": 1, "c": 2}, "ids follow first appearance")
+check(encode(["c", "a", "a"], v) == [2, 0, 0], "encode maps tokens to ids")`},
+
+{stage:"6 · Vectors", id:"dot", title:"Dot product",
+why:"The most important operation in ML. Attention scores, linear layers and similarity are all dot products.",
+task:"Write <code>dot(a, b)</code> for two equal-length lists. Raise a <code>ValueError</code> if the lengths differ.",
+pseudo:`if len(a) != len(b): raise ValueError
+s = 0
+for i in range(len(a)):
+    s += a[i] * b[i]
+return s`,
+hints:["Check the lengths first, before the loop.","zip(a, b) pairs up items so you can write: for x, y in zip(a, b)."],
+starter:`def dot(a, b):
+    pass
+`,
+solution:`def dot(a, b):
+    if len(a) != len(b):
+        raise ValueError("length mismatch")
+    s = 0
+    for x, y in zip(a, b):
+        s += x * y
+    return s
+`,
+tests:`check(dot([1, 2, 3], [4, 5, 6]) == 32, "1*4 + 2*5 + 3*6 = 32")
+check(dot([], []) == 0, "empty vectors give 0")
+raised = False
+try:
+    dot([1, 2], [1])
+except ValueError:
+    raised = True
+check(raised, "mismatched lengths should raise ValueError")`},
+
+{stage:"6 · Vectors", id:"mean_std", title:"Mean and standard deviation",
+why:"You use these for feature scaling, BatchNorm and LayerNorm, and for reading your training metrics.",
+task:"Write <code>mean(xs)</code> and <code>std(xs)</code>. Use the population formula: variance = average of (x − mean)².",
+pseudo:`mean = sum(xs) / len(xs)
+var  = sum((x - mean)^2 for x in xs) / len(xs)
+std  = sqrt(var)`,
+hints:["import math, then math.sqrt.","Compute the mean once and reuse it inside std."],
+starter:`import math
+
+def mean(xs):
+    pass
+
+def std(xs):
+    pass
+`,
+solution:`import math
+
+def mean(xs):
+    return sum(xs) / len(xs)
+
+def std(xs):
+    m = mean(xs)
+    return math.sqrt(sum((x - m) ** 2 for x in xs) / len(xs))
+`,
+tests:`check(close(mean([1, 2, 3, 4]), 2.5), "mean of [1,2,3,4] is 2.5")
+check(close(std([2, 4, 4, 4, 5, 5, 7, 9]), 2.0), "std of the classic example is 2.0")
+check(close(std([3, 3, 3]), 0.0), "constant list has std 0")`},
+
+{stage:"6 · Vectors", id:"zscore", title:"Standardize features",
+why:"Gradient descent behaves much better when features have mean 0 and std 1. This is also the core of LayerNorm.",
+task:"Write <code>standardize(xs, eps=1e-8)</code> that returns <code>(x − mean) / (std + eps)</code> for each x. Write mean and std inline or copy them from the last exercise.",
+pseudo:`m = mean(xs); s = std(xs)
+return [(x - m) / (s + eps) for x in xs]`,
+hints:["eps stops a divide-by-zero when every value is the same.","This is LayerNorm without the learned scale and shift."],
+starter:`import math
+
+def standardize(xs, eps=1e-8):
+    pass
+`,
+solution:`import math
+
+def standardize(xs, eps=1e-8):
+    m = sum(xs) / len(xs)
+    s = math.sqrt(sum((x - m) ** 2 for x in xs) / len(xs))
+    return [(x - m) / (s + eps) for x in xs]
+`,
+tests:`z = standardize([1.0, 2.0, 3.0])
+check(close(sum(z) / 3, 0.0), "result should have mean 0")
+check(close(z[2], 1.2247448), "z[2] should be about 1.2247")
+c = standardize([5.0, 5.0])
+check(close(c[0], 0.0), "constant input gives zeros, not a crash")`},
+
+{stage:"7 · Matrices", id:"transpose", title:"Transpose",
+why:"K transposed in QKᵀ. You'll flip matrices constantly, and you need to know the shapes cold.",
+task:"Write <code>transpose(M)</code> for a matrix stored as a list of rows. A 2×3 matrix becomes 3×2.",
+pseudo:`rows = len(M); cols = len(M[0])
+result[j][i] = M[i][j]
+for j in range(cols): build row j from column j of M`,
+hints:["The output has len(M[0]) rows.","Row j of the output is [M[i][j] for i in range(len(M))]."],
+starter:`def transpose(M):
+    pass
+`,
+solution:`def transpose(M):
+    return [[M[i][j] for i in range(len(M))] for j in range(len(M[0]))]
+`,
+tests:`check(transpose([[1, 2, 3], [4, 5, 6]]) == [[1, 4], [2, 5], [3, 6]], "2x3 becomes 3x2")
+check(transpose([[7]]) == [[7]], "1x1 is unchanged")`},
+
+{stage:"7 · Matrices", id:"matvec", title:"Matrix times vector",
+why:"A linear layer is y = Wx + b. This is the Wx part.",
+task:"Write <code>matvec(W, x)</code>. W has shape (out, in) and x has length in. Return a list of length out.",
+pseudo:`for each row in W:
+    output.append(dot(row, x))`,
+hints:["Each output number is the dot product of one row of W with x.","Shape check: len(W[0]) must equal len(x)."],
+starter:`def matvec(W, x):
+    pass
+`,
+solution:`def matvec(W, x):
+    return [sum(w * xi for w, xi in zip(row, x)) for row in W]
+`,
+tests:`check(matvec([[1, 0], [0, 1]], [3, 4]) == [3, 4], "identity leaves x unchanged")
+check(matvec([[1, 2], [3, 4], [5, 6]], [1, 1]) == [3, 7, 11], "(3,2) times (2,) gives (3,)")`},
+
+{stage:"7 · Matrices", id:"matmul", title:"Matrix multiply",
+why:"Interviewers ask for this all the time. It's also how a batch goes through a layer, and how attention computes QKᵀ.",
+task:"Write <code>matmul(A, B)</code>. A is (n, k), B is (k, m), and the result is (n, m). Raise <code>ValueError</code> if the inner sizes don't match.",
+pseudo:`check len(A[0]) == len(B)
+C = n x m zeros
+for i in range(n):
+  for j in range(m):
+    for p in range(k):
+      C[i][j] += A[i][p] * B[p][j]`,
+hints:["Three nested loops: rows of A, columns of B, then the shared dimension.","Build C with [[0]*m for _ in range(n)]. Don't use [[0]*m]*n, because every row would be the same list.","C[i][j] is the dot product of row i of A and column j of B."],
+starter:`def matmul(A, B):
+    pass
+`,
+solution:`def matmul(A, B):
+    n, k, m = len(A), len(A[0]), len(B[0])
+    if k != len(B):
+        raise ValueError("shape mismatch")
+    C = [[0] * m for _ in range(n)]
+    for i in range(n):
+        for j in range(m):
+            for p in range(k):
+                C[i][j] += A[i][p] * B[p][j]
+    return C
+`,
+tests:`check(matmul([[1, 2], [3, 4]], [[5, 6], [7, 8]]) == [[19, 22], [43, 50]], "2x2 @ 2x2")
+check(matmul([[1, 2, 3]], [[1], [1], [1]]) == [[6]], "1x3 @ 3x1 gives 1x1")
+raised = False
+try:
+    matmul([[1, 2]], [[1, 2]])
+except ValueError:
+    raised = True
+check(raised, "(1,2) @ (1,2) should raise ValueError")`},
+
+{stage:"8 · Core ML functions", id:"activations", title:"ReLU and sigmoid",
+why:"These are the two activations you're most likely to be asked about. Sigmoid also turns a logit into a probability.",
+task:"Write <code>relu(x)</code> and <code>sigmoid(x)</code> for a single number. sigmoid(x) = 1 / (1 + e<sup>−x</sup>).",
+pseudo:`relu(x)    = max(0, x)
+sigmoid(x) = 1 / (1 + exp(-x))`,
+hints:["math.exp(-x).","Advanced: for very negative x, exp(-x) overflows. You can use exp(x) / (1 + exp(x)) when x < 0."],
+starter:`import math
+
+def relu(x):
+    pass
+
+def sigmoid(x):
+    pass
+`,
+solution:`import math
+
+def relu(x):
+    return max(0, x)
+
+def sigmoid(x):
+    if x >= 0:
+        return 1 / (1 + math.exp(-x))
+    e = math.exp(x)
+    return e / (1 + e)
+`,
+tests:`check(relu(-3) == 0 and relu(2.5) == 2.5, "relu clips negatives to 0")
+check(close(sigmoid(0), 0.5), "sigmoid(0) = 0.5")
+check(close(sigmoid(2), 0.8807971), "sigmoid(2) is about 0.8808")
+check(sigmoid(-1000) >= 0, "sigmoid(-1000) should not crash")`},
+
+{stage:"8 · Core ML functions", id:"softmax", title:"Stable softmax",
+why:"The single most-asked ML coding question. The trick that matters is subtracting the max.",
+task:"Write <code>softmax(xs)</code> that turns scores into probabilities that sum to 1. Make it <b>numerically stable</b> so it works for huge inputs like [1000, 1001].",
+pseudo:`m = max(xs)
+exps = [exp(x - m) for x in xs]
+total = sum(exps)
+return [e / total for e in exps]`,
+hints:["exp(1000) overflows. Subtracting the max first gives the same answer without overflowing.","Why it's the same: e^(x−m) / Σe^(x−m) = e^x / Σe^x, because the e^(−m) cancels.","Say this out loud in the interview. They're listening for it."],
+starter:`import math
+
+def softmax(xs):
+    pass
+`,
+solution:`import math
+
+def softmax(xs):
+    m = max(xs)
+    exps = [math.exp(x - m) for x in xs]
+    total = sum(exps)
+    return [e / total for e in exps]
+`,
+tests:`p = softmax([1.0, 2.0, 3.0])
+check(close(sum(p), 1.0), "probabilities sum to 1")
+check(close(p[2], 0.6652409), "p[2] is about 0.6652")
+q = softmax([1000.0, 1001.0])
+check(close(q[1], 0.7310586), "stable for large inputs")`},
+
+{stage:"8 · Core ML functions", id:"cross_entropy", title:"Cross-entropy loss",
+why:"This is the classification loss. Expect questions like: what is it, why the log, what happens at p = 0?",
+task:"Write <code>cross_entropy(probs, label)</code>, the loss for one example: −log(probs[label]). Clip the probability to at least 1e-12 so log(0) doesn't crash.",
+pseudo:`p = max(probs[label], 1e-12)
+return -log(p)`,
+hints:["Only the probability of the correct class matters.","math.log is the natural log."],
+starter:`import math
+
+def cross_entropy(probs, label):
+    pass
+`,
+solution:`import math
+
+def cross_entropy(probs, label):
+    return -math.log(max(probs[label], 1e-12))
+`,
+tests:`check(close(cross_entropy([0.1, 0.7, 0.2], 1), 0.3566749), "-log(0.7) is about 0.3567")
+check(close(cross_entropy([0.0, 1.0], 1), 0.0), "a perfect prediction gives 0 loss")
+check(cross_entropy([1.0, 0.0], 1) > 20, "p = 0 gives a large finite loss, not a crash")`},
+
+{stage:"8 · Core ML functions", id:"metrics", title:"Accuracy, precision, recall",
+why:"Interviewers love asking you to compute these by hand, then asking when accuracy is misleading.",
+task:"Write <code>metrics(y_true, y_pred)</code> for binary labels (0/1). Return a tuple <code>(accuracy, precision, recall)</code>. Return 0.0 for precision or recall if the denominator is 0.",
+pseudo:`count tp, fp, fn, tn in one loop
+accuracy  = (tp + tn) / n
+precision = tp / (tp + fp)   # of predicted positives, how many were right
+recall    = tp / (tp + fn)   # of actual positives, how many we found`,
+hints:["tp: true 1, predicted 1. fp: true 0, predicted 1. fn: true 1, predicted 0.","Guard both divisions."],
+starter:`def metrics(y_true, y_pred):
+    pass
+`,
+solution:`def metrics(y_true, y_pred):
+    tp = fp = fn = tn = 0
+    for t, p in zip(y_true, y_pred):
+        if t == 1 and p == 1: tp += 1
+        elif t == 0 and p == 1: fp += 1
+        elif t == 1 and p == 0: fn += 1
+        else: tn += 1
+    acc = (tp + tn) / len(y_true)
+    prec = tp / (tp + fp) if tp + fp else 0.0
+    rec = tp / (tp + fn) if tp + fn else 0.0
+    return acc, prec, rec
+`,
+tests:`a, p, r = metrics([1, 0, 1, 1, 0], [1, 1, 0, 1, 0])
+check(close(a, 0.6), "accuracy should be 3/5")
+check(close(p, 2/3), "precision should be 2/3")
+check(close(r, 2/3), "recall should be 2/3")
+a, p, r = metrics([0, 0], [0, 0])
+check(p == 0.0 and r == 0.0, "no positives gives 0.0, not a crash")`},
+
+{stage:"9 · Layers as classes", id:"linear", title:"A Linear layer class",
+why:"This is exactly the shape of the question you froze on: a class with __init__ and forward. Learn the skeleton.",
+task:"Write a class <code>Linear</code>. <code>__init__(self, W, b)</code> stores weights of shape (out, in) and a bias of length out. <code>forward(self, x)</code> returns Wx + b for a single vector x.",
+pseudo:`class Linear:
+    __init__: self.W = W; self.b = b
+    forward(x):
+        out = []
+        for each row, bias in zip(W, b):
+            out.append(dot(row, x) + bias)
+        return out`,
+hints:["Always write the skeleton first: class line, __init__, forward. Then fill it in.","Everything you store needs self. in front of it.","This is your matvec plus a bias."],
+starter:`class Linear:
+    def __init__(self, W, b):
+        pass
+
+    def forward(self, x):
+        pass
+`,
+solution:`class Linear:
+    def __init__(self, W, b):
+        self.W = W
+        self.b = b
+
+    def forward(self, x):
+        return [sum(w * xi for w, xi in zip(row, x)) + bi
+                for row, bi in zip(self.W, self.b)]
+`,
+tests:`layer = Linear([[1, 2], [3, 4]], [0.5, -1])
+check(layer.forward([1, 1]) == [3.5, 6], "Wx + b with x = [1,1]")
+check(layer.forward([0, 0]) == [0.5, -1], "zero input returns the bias")`},
+
+{stage:"9 · Layers as classes", id:"scaler", title:"A fit/transform scaler",
+why:"The scikit-learn fit/transform pattern. It also tests whether you know to fit on training data only.",
+task:"Write a class <code>StandardScaler</code> with <code>fit(xs)</code> (stores mean and std, returns self) and <code>transform(xs)</code> (applies the stored values). Use eps = 1e-8 in the division.",
+pseudo:`fit(xs):
+    self.mean = mean(xs); self.std = std(xs); return self
+transform(xs):
+    return [(x - self.mean) / (self.std + 1e-8) for x in xs]`,
+hints:["transform must use the stored stats, not recompute them from new data.","Returning self from fit lets you chain: StandardScaler().fit(train).transform(test)."],
+starter:`import math
+
+class StandardScaler:
+    def fit(self, xs):
+        pass
+
+    def transform(self, xs):
+        pass
+`,
+solution:`import math
+
+class StandardScaler:
+    def fit(self, xs):
+        self.mean = sum(xs) / len(xs)
+        self.std = math.sqrt(sum((x - self.mean) ** 2 for x in xs) / len(xs))
+        return self
+
+    def transform(self, xs):
+        return [(x - self.mean) / (self.std + 1e-8) for x in xs]
+`,
+tests:`s = StandardScaler().fit([0.0, 2.0])
+check(close(s.mean, 1.0) and close(s.std, 1.0), "fit stores mean 1 and std 1")
+check(close(s.transform([3.0])[0], 2.0), "transform uses the stored stats: (3-1)/1 = 2")`},
+
+{stage:"10 · Training loops", id:"mse", title:"MSE loss and its gradient",
+why:"Regression loss, and the first gradient you should be able to derive on a whiteboard.",
+task:"Write <code>mse(y, y_hat)</code> = mean of (y_hat − y)². Then write <code>mse_grad(y, y_hat)</code> that returns the derivative with respect to each y_hat: 2·(y_hat − y)/n.",
+pseudo:`n = len(y)
+mse  = sum((yh - yt)^2) / n
+grad = [2 * (yh - yt) / n for each pair]`,
+hints:["Derivative of (u)² is 2u, and the 1/n from the mean stays."],
+starter:`def mse(y, y_hat):
+    pass
+
+def mse_grad(y, y_hat):
+    pass
+`,
+solution:`def mse(y, y_hat):
+    return sum((p - t) ** 2 for t, p in zip(y, y_hat)) / len(y)
+
+def mse_grad(y, y_hat):
+    n = len(y)
+    return [2 * (p - t) / n for t, p in zip(y, y_hat)]
+`,
+tests:`check(close(mse([1, 2], [1, 4]), 2.0), "((0)^2 + (2)^2) / 2 = 2")
+check(mse_grad([1, 2], [1, 4]) == [0.0, 2.0], "gradient is 2*(y_hat - y)/n")`},
+
+{stage:"10 · Training loops", id:"gd", title:"Gradient descent: linear regression",
+why:"You will be asked to write a training loop. Here is the whole loop, with no libraries, in about 10 lines.",
+task:"Write <code>fit_line(xs, ys, lr=0.05, steps=2000)</code> that learns w and b for y ≈ w·x + b by gradient descent on MSE. Return <code>(w, b)</code>.",
+pseudo:`w, b = 0, 0
+repeat steps times:
+    preds = [w*x + b for x in xs]
+    errors = [p - y for p, y in zip(preds, ys)]
+    dw = 2/n * sum(e * x)
+    db = 2/n * sum(e)
+    w -= lr * dw
+    b -= lr * db
+return w, b`,
+hints:["Every training loop has the same four steps: forward, loss/error, gradient, update.","dw uses error times x. db uses the error alone.","Data generated from y = 2x + 1 should give w ≈ 2 and b ≈ 1."],
+starter:`def fit_line(xs, ys, lr=0.05, steps=2000):
+    pass
+`,
+solution:`def fit_line(xs, ys, lr=0.05, steps=2000):
+    w, b = 0.0, 0.0
+    n = len(xs)
+    for _ in range(steps):
+        errs = [(w * x + b) - y for x, y in zip(xs, ys)]
+        dw = 2 / n * sum(e * x for e, x in zip(errs, xs))
+        db = 2 / n * sum(errs)
+        w -= lr * dw
+        b -= lr * db
+    return w, b
+`,
+tests:`xs = [0, 1, 2, 3, 4]
+ys = [2 * x + 1 for x in xs]
+w, b = fit_line(xs, ys)
+check(abs(w - 2) < 0.01, "w should be close to 2 (got " + str(round(w, 3)) + ")")
+check(abs(b - 1) < 0.01, "b should be close to 1 (got " + str(round(b, 3)) + ")")`},
+
+{stage:"10 · Training loops", id:"logreg", title:"Logistic regression step",
+why:"Binary classification from scratch. The gradient turns out to be neat: (p − y)·x.",
+task:"Write <code>logreg_step(w, b, X, y, lr)</code> that does one gradient step for logistic regression. X is a list of feature vectors, y is 0/1 labels. Return the new <code>(w, b)</code>.",
+pseudo:`for each example i:
+    p = sigmoid(dot(w, X[i]) + b)
+    err = p - y[i]
+    dw[j] += err * X[i][j]   for each feature j
+    db    += err
+average dw and db by n, then
+w = w - lr * dw;  b = b - lr * db`,
+hints:["With sigmoid + cross-entropy, the gradient wrt the logit is just p − y.","Keep dw as a list the same length as w."],
+starter:`import math
+
+def sigmoid(z):
+    return 1 / (1 + math.exp(-z))
+
+def logreg_step(w, b, X, y, lr):
+    pass
+`,
+solution:`import math
+
+def sigmoid(z):
+    return 1 / (1 + math.exp(-z))
+
+def logreg_step(w, b, X, y, lr):
+    n = len(X)
+    dw = [0.0] * len(w)
+    db = 0.0
+    for xi, yi in zip(X, y):
+        p = sigmoid(sum(wj * xj for wj, xj in zip(w, xi)) + b)
+        err = p - yi
+        for j in range(len(w)):
+            dw[j] += err * xi[j]
+        db += err
+    w = [wj - lr * d / n for wj, d in zip(w, dw)]
+    b = b - lr * db / n
+    return w, b
+`,
+tests:`w, b = logreg_step([0.0], 0.0, [[1.0], [-1.0]], [1, 0], 1.0)
+check(close(w[0], 0.5), "first step from zeros gives w = 0.5")
+check(close(b, 0.0), "symmetric data keeps b = 0")
+w, b = [0.0, 0.0], 0.0
+X = [[2, 1], [1, 3], [-1, -2], [-2, -1]]
+Y = [1, 1, 0, 0]
+for _ in range(200):
+    w, b = logreg_step(w, b, X, Y, 0.5)
+preds = [1 if sigmoid(w[0]*x[0] + w[1]*x[1] + b) > 0.5 else 0 for x in X]
+check(preds == Y, "after 200 steps it should separate the toy data")`},
+
+{stage:"11 · Classic algorithms", id:"knn", title:"k-nearest neighbors",
+why:"A common 'implement from scratch' question. It tests distances, sorting with a key, and voting.",
+task:"Write <code>knn_predict(X_train, y_train, x, k)</code>. Use Euclidean distance, take the k closest training points, and return the most common label among them.",
+pseudo:`dists = [(distance(x, xi), yi) for each training pair]
+sort dists by distance
+take first k labels
+return most common label`,
+hints:["sorted(list_of_pairs, key=lambda t: t[0]).","You can skip the sqrt. It doesn't change the ordering.","Count votes with a dict, then pick the label with the highest count."],
+starter:`def knn_predict(X_train, y_train, x, k):
+    pass
+`,
+solution:`def knn_predict(X_train, y_train, x, k):
+    d = []
+    for xi, yi in zip(X_train, y_train):
+        dist = sum((a - c) ** 2 for a, c in zip(xi, x))
+        d.append((dist, yi))
+    d = sorted(d, key=lambda t: t[0])[:k]
+    votes = {}
+    for _, label in d:
+        votes[label] = votes.get(label, 0) + 1
+    return max(votes, key=lambda lab: votes[lab])
+`,
+tests:`X = [[0, 0], [0, 1], [1, 0], [5, 5], [5, 6], [6, 5]]
+Y = ["a", "a", "a", "b", "b", "b"]
+check(knn_predict(X, Y, [0.2, 0.2], 3) == "a", "point near the origin is 'a'")
+check(knn_predict(X, Y, [5.5, 5.5], 3) == "b", "point near (5,5) is 'b'")
+check(knn_predict(X, Y, [4, 4], 1) == "b", "k=1 uses the single nearest point")`},
+
+{stage:"11 · Classic algorithms", id:"kmeans", title:"k-means (one iteration)",
+why:"Shows you can write the assign-then-update loop that a lot of algorithms share.",
+task:"Write <code>kmeans_step(points, centroids)</code>. Assign each point to its nearest centroid, then move each centroid to the mean of its points. Return the new centroids. If a centroid gets no points, keep it where it was.",
+pseudo:`groups = [[] for each centroid]
+for p in points:
+    c = index of nearest centroid
+    groups[c].append(p)
+new = []
+for i, g in enumerate(groups):
+    if g empty: keep centroids[i]
+    else: average of g, coordinate by coordinate`,
+hints:["The nearest centroid is an argmin over distances.","Coordinate mean: [sum(p[d] for p in g) / len(g) for d in range(dims)]."],
+starter:`def kmeans_step(points, centroids):
+    pass
+`,
+solution:`def kmeans_step(points, centroids):
+    groups = [[] for _ in centroids]
+    for p in points:
+        best, best_d = 0, None
+        for i, c in enumerate(centroids):
+            d = sum((a - b) ** 2 for a, b in zip(p, c))
+            if best_d is None or d < best_d:
+                best, best_d = i, d
+        groups[best].append(p)
+    new = []
+    for i, g in enumerate(groups):
+        if not g:
+            new.append(centroids[i])
+        else:
+            new.append([sum(p[d] for p in g) / len(g) for d in range(len(g[0]))])
+    return new
+`,
+tests:`pts = [[0, 0], [0, 2], [10, 10], [10, 12]]
+c = kmeans_step(pts, [[1, 1], [9, 9]])
+check(c == [[0.0, 1.0], [10.0, 11.0]], "centroids move to their cluster means")
+c = kmeans_step([[0, 0]], [[0, 0], [100, 100]])
+check(c[1] == [100, 100], "an empty cluster keeps its centroid")`},
+
+{stage:"11 · Classic algorithms", id:"batches", title:"Mini-batches",
+why:"Every training loop iterates over batches. Interviewers check that you handle the last, smaller batch.",
+task:"Write <code>batches(data, batch_size)</code> that returns a list of chunks. The last chunk may be smaller.",
+pseudo:`out = []
+for start in range(0, len(data), batch_size):
+    out.append(data[start : start + batch_size])
+return out`,
+hints:["range(0, n, step) jumps by step.","Slicing past the end of a list is safe in Python."],
+starter:`def batches(data, batch_size):
+    pass
+`,
+solution:`def batches(data, batch_size):
+    return [data[i:i + batch_size] for i in range(0, len(data), batch_size)]
+`,
+tests:`check(batches([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]], "the last batch is smaller")
+check(batches([], 3) == [], "no data gives no batches")`},
+
+{stage:"12 · Attention", id:"attention", title:"Scaled dot-product attention",
+why:"The question you froze on. You've now written every piece: matmul, transpose, softmax. This exercise just puts them together.",
+task:"Write <code>attention(Q, K, V)</code> for one sequence. Q and K are (T, d), V is (T, d_v). Return softmax(QKᵀ / √d) · V, shape (T, d_v). Helpers are already written for you.",
+pseudo:`d = len(Q[0])
+scores = matmul(Q, transpose(K))        # (T, T)
+scale every score by 1 / sqrt(d)
+weights = [softmax(row) for row in scores]  # each row sums to 1
+return matmul(weights, V)               # (T, d_v)`,
+hints:["Say the shapes out loud first: (T,d) @ (d,T) → (T,T), then (T,T) @ (T,d_v) → (T,d_v).","Softmax goes across each row, so each query's weights over all keys sum to 1.","Scale before softmax, not after."],
+starter:`import math
+
+def transpose(M):
+    return [list(r) for r in zip(*M)]
+
+def matmul(A, B):
+    Bt = transpose(B)
+    return [[sum(a * b for a, b in zip(row, col)) for col in Bt] for row in A]
+
+def softmax(xs):
+    m = max(xs)
+    e = [math.exp(x - m) for x in xs]
+    s = sum(e)
+    return [v / s for v in e]
+
+def attention(Q, K, V):
+    pass
+`,
+solution:`import math
+
+def transpose(M):
+    return [list(r) for r in zip(*M)]
+
+def matmul(A, B):
+    Bt = transpose(B)
+    return [[sum(a * b for a, b in zip(row, col)) for col in Bt] for row in A]
+
+def softmax(xs):
+    m = max(xs)
+    e = [math.exp(x - m) for x in xs]
+    s = sum(e)
+    return [v / s for v in e]
+
+def attention(Q, K, V):
+    d = len(Q[0])
+    scores = matmul(Q, transpose(K))
+    scores = [[s / math.sqrt(d) for s in row] for row in scores]
+    weights = [softmax(row) for row in scores]
+    return matmul(weights, V)
+`,
+tests:`out = attention([[1, 0], [0, 1]], [[1, 0], [0, 1]], [[1, 2], [3, 4]])
+check(len(out) == 2 and len(out[0]) == 2, "output shape should be (2, 2)")
+check(close(out[0][0], 1.6604769), "out[0][0] is about 1.6605")
+check(close(out[1][1], 3.3395231), "out[1][1] is about 3.3395")
+same = attention([[0, 0]], [[1, 1], [2, 2]], [[10], [20]])
+check(close(same[0][0], 15.0), "equal scores average V evenly")`},
+
+{stage:"12 · Attention", id:"causal", title:"Causal mask",
+why:"GPT-style models can't look at future tokens. This is the follow-up question that comes right after attention.",
+task:"Write <code>causal_attention(Q, K, V)</code>. Same as before, but before the softmax set every score where key index j > query index i to −infinity.",
+pseudo:`scores as before (scaled)
+for i in range(T):
+    for j in range(T):
+        if j > i: scores[i][j] = -inf
+softmax rows, then multiply by V`,
+hints:["float('-inf') works, and exp(-inf - m) is 0.","Row 0 can only attend to itself, so out[0] must equal V[0] exactly."],
+starter:`import math
+
+def transpose(M):
+    return [list(r) for r in zip(*M)]
+
+def matmul(A, B):
+    Bt = transpose(B)
+    return [[sum(a * b for a, b in zip(row, col)) for col in Bt] for row in A]
+
+def softmax(xs):
+    m = max(xs)
+    e = [math.exp(x - m) for x in xs]
+    s = sum(e)
+    return [v / s for v in e]
+
+def causal_attention(Q, K, V):
+    pass
+`,
+solution:`import math
+
+def transpose(M):
+    return [list(r) for r in zip(*M)]
+
+def matmul(A, B):
+    Bt = transpose(B)
+    return [[sum(a * b for a, b in zip(row, col)) for col in Bt] for row in A]
+
+def softmax(xs):
+    m = max(xs)
+    e = [math.exp(x - m) for x in xs]
+    s = sum(e)
+    return [v / s for v in e]
+
+def causal_attention(Q, K, V):
+    d = len(Q[0])
+    T = len(Q)
+    scores = matmul(Q, transpose(K))
+    for i in range(T):
+        for j in range(T):
+            scores[i][j] = scores[i][j] / math.sqrt(d) if j <= i else float("-inf")
+    weights = [softmax(row) for row in scores]
+    return matmul(weights, V)
+`,
+tests:`Q = [[1, 0], [0, 1], [1, 1]]
+V = [[1, 0], [0, 1], [5, 5]]
+out = causal_attention(Q, Q, V)
+check(close(out[0][0], 1.0) and close(out[0][1], 0.0), "token 0 only sees itself")
+check(out[1][0] < 1 and out[1][1] > 0, "token 1 mixes tokens 0 and 1")
+check(out[1][0] + out[1][1] < 1.0001, "token 1 cannot see token 2 (no 5s leaking in)")`},
+];
+
+</script>
+<script>
+// Part 3: Interview concept cards. Answer out loud first, then reveal and rate yourself.
+const CONCEPTS = [
+// Python
+{topic:"Python", q:"What's the difference between a list and a tuple?", a:"A list is mutable: you can append, remove and change items. A tuple is immutable. Tuples can be dict keys and signal 'this shouldn't change', for example a tensor shape like (32, 128)."},
+{topic:"Python", q:"What's the difference between == and is?", a:"== checks whether two values are equal. is checks whether two names point at the exact same object. Use is only for None: if x is None."},
+{topic:"Python", q:"Why is def f(x, cache=[]) a bug?", a:"The default list is created once, when the function is defined, and shared across every call, so it keeps growing. Use cache=None and create a new list inside: if cache is None: cache = []."},
+{topic:"Python", q:"Shallow copy vs deep copy?", a:"A shallow copy (xs.copy(), list(xs)) makes a new outer list but shares the inner objects. A deep copy (copy.deepcopy) copies everything all the way down. A copied list of lists is still linked unless you deep copy it."},
+{topic:"Python", q:"What are *args and **kwargs?", a:"*args collects extra positional arguments into a tuple. **kwargs collects extra keyword arguments into a dict. They're how wrappers pass arguments through, as in def forward(self, *args, **kwargs)."},
+{topic:"Python", q:"What is a generator and why use one?", a:"A function that uses yield produces values one at a time instead of building a whole list in memory. Data loaders use this idea to stream batches that wouldn't fit in RAM."},
+{topic:"Python", q:"What does if __name__ == '__main__': do?", a:"The code under it runs only when the file is executed directly, not when it's imported. It keeps a training script's main loop from running when another file imports a helper from it."},
+{topic:"Python", q:"What's a decorator?", a:"A function that takes a function and returns a wrapped version. @torch.no_grad() and @staticmethod are decorators. They add behavior like timing, caching or disabling gradients without changing the function body."},
+// CS
+{topic:"CS basics", q:"Why is dict lookup O(1) but list search O(n)?", a:"A dict hashes the key to jump straight to its slot. A list has no index by value, so finding something means checking items one by one."},
+{topic:"CS basics", q:"What's the time complexity of sorting?", a:"O(n log n) for general comparison sorts like Python's sorted (Timsort). Comparison sorting can't do better in the worst case."},
+{topic:"CS basics", q:"Space vs time trade-off: give an example.", a:"Caching (memoization) stores results to avoid recomputing them, using more memory to save time. The KV cache in transformer inference does this with past keys and values."},
+{topic:"CS basics", q:"What's the complexity of multiplying an (n×k) matrix by a (k×m) matrix?", a:"O(n·k·m), because there are n×m output cells and each is a k-length dot product. For square n×n matrices that's O(n³)."},
+// ML fundamentals
+{topic:"ML fundamentals", q:"What is overfitting and how do you spot it?", a:"The model memorizes the training data instead of learning patterns that generalize. You spot it when training loss keeps dropping but validation loss stops improving or rises."},
+{topic:"ML fundamentals", q:"How do you reduce overfitting?", a:"More data, data augmentation, regularization (L2/weight decay, dropout), a smaller model, early stopping on validation loss, or cross-validation to tune all of these honestly."},
+{topic:"ML fundamentals", q:"Explain the bias-variance trade-off.", a:"Bias is error from a model too simple to capture the pattern (underfitting). Variance is error from a model too sensitive to the particular training set (overfitting). More capacity lowers bias and raises variance, so you look for the balance that minimizes validation error."},
+{topic:"ML fundamentals", q:"Why have separate train, validation and test sets?", a:"Train fits the weights. Validation is for choosing hyperparameters and early stopping. Test is touched once at the end for an unbiased estimate. Tuning on the test set makes its score optimistic."},
+{topic:"ML fundamentals", q:"What is data leakage? Give an example.", a:"Information from outside the training data sneaks into training and inflates scores. Example: fitting a scaler on the full dataset before splitting, or having the same user in both train and test."},
+{topic:"ML fundamentals", q:"L1 vs L2 regularization?", a:"L1 adds the sum of |w| and pushes many weights to exactly zero (sparse). L2 adds the sum of w² and shrinks all weights smoothly. L2 is weight decay."},
+{topic:"ML fundamentals", q:"When is accuracy misleading?", a:"With imbalanced classes. If 99% of transactions are legit, predicting 'legit' every time scores 99% accuracy and catches no fraud. Use precision, recall, F1 or PR-AUC instead."},
+{topic:"ML fundamentals", q:"Precision vs recall: when do you favor each?", a:"Precision: of the things you flagged, how many were right. Favor it when false alarms are costly (spam filtering). Recall: of the real positives, how many you caught. Favor it when misses are costly (cancer screening)."},
+{topic:"ML fundamentals", q:"Why scale or normalize features?", a:"Features on very different scales make the loss surface stretched, so gradient descent zig-zags and needs a tiny learning rate. Distance-based methods like kNN are also dominated by the largest-scale feature."},
+// Training
+{topic:"Training", q:"Batch vs mini-batch vs stochastic gradient descent?", a:"Batch uses the whole dataset per step: accurate but slow. Stochastic uses one example: noisy but cheap. Mini-batch (32 to a few thousand) is the practical middle and uses the GPU efficiently."},
+{topic:"Training", q:"What happens if the learning rate is too high or too low?", a:"Too high: the loss bounces around or explodes to NaN. Too low: training crawls and can stall. Warmup followed by a decay schedule is the usual fix."},
+{topic:"Training", q:"What are vanishing and exploding gradients?", a:"Gradients multiply through many layers, so they can shrink to near zero or blow up. Fixes include ReLU-family activations, careful initialization, residual connections, normalization layers and gradient clipping."},
+{topic:"Training", q:"What does Adam do differently from plain SGD?", a:"It keeps a running average of gradients (momentum) and of squared gradients, and scales each parameter's step by them. That gives every parameter its own adaptive learning rate. AdamW decouples weight decay from that update."},
+{topic:"Training", q:"What is dropout and why does it help?", a:"During training it randomly zeroes activations with probability p, so the network can't rely on any one unit. It works like training an ensemble. It's turned off at eval time, which is why model.eval() matters."},
+{topic:"Training", q:"BatchNorm vs LayerNorm?", a:"BatchNorm normalizes each feature across the batch, so it depends on batch size and behaves differently at eval. LayerNorm normalizes across the features of each single example, so it's batch-independent. Transformers use LayerNorm."},
+{topic:"Training", q:"Why sigmoid + cross-entropy instead of sigmoid + MSE for classification?", a:"With cross-entropy the gradient with respect to the logit is simply (p − y), which stays strong when the model is confidently wrong. MSE through a sigmoid has gradients that vanish when the sigmoid saturates."},
+// Transformers
+{topic:"Transformers", q:"Explain attention in one sentence.", a:"Each token builds a query, compares it with every token's key to get weights through a softmax, and outputs a weighted sum of their values."},
+{topic:"Transformers", q:"Why divide by √d_k?", a:"Dot products of d_k-dimensional vectors have variance that grows with d_k. Large scores push softmax into near one-hot regions with tiny gradients. Dividing by √d_k keeps the variance around 1."},
+{topic:"Transformers", q:"Why multiple heads?", a:"Each head gets its own Q/K/V projections, so different heads can attend to different relationships at once (syntax, position, coreference). Their outputs are concatenated and projected back to d_model."},
+{topic:"Transformers", q:"Why do transformers need positional encoding?", a:"Attention is permutation-invariant: shuffle the tokens and each output is just shuffled too. Position information (sinusoidal, learned, or rotary/RoPE) has to be injected so order matters."},
+{topic:"Transformers", q:"What's the complexity of self-attention?", a:"O(n²·d) time and O(n²) memory in sequence length n, because every token scores every other token. That's why long context is expensive and why FlashAttention and sparse or linear attention exist."},
+{topic:"Transformers", q:"What's a causal mask and why is it needed?", a:"It sets scores for future positions to −∞ before the softmax, so token i only attends to tokens ≤ i. A decoder trained to predict the next token would otherwise just look at the answer."},
+{topic:"Transformers", q:"What is the KV cache?", a:"During generation, keys and values for past tokens don't change, so you store them and compute only the new token's Q, K and V each step. It saves a lot of compute at the cost of memory."},
+{topic:"Transformers", q:"Encoder-only vs decoder-only vs encoder-decoder?", a:"Encoder-only (BERT) uses bidirectional attention for understanding tasks. Decoder-only (GPT) uses causal attention for generation. Encoder-decoder (T5, original Transformer) encodes an input and generates an output with cross-attention, as in translation."},
+{topic:"Transformers", q:"What do residual connections do?", a:"They add a layer's input to its output (x + f(x)), so gradients have a direct path back through the network and each layer only has to learn a correction. They make very deep stacks trainable."},
+];
+
+</script>
+<script>
+// Vibe Coder Bootcamp: course UI, in-browser Python runner (Skulpt), and concept cards.
+(function () {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  };
+
+  const PARTS = [
+    { name: "Part 1 · Foundations", lessons: FOUNDATION_LESSONS },
+    { name: "Part 2 · ML coding", lessons: ML_LESSONS },
+  ];
+  const LESSONS = PARTS.flatMap(p => p.lessons.map(l => Object.assign({ part: p.name }, l)));
+  const DEFAULT_OUT = "Write your code, then press Run tests.\nUse print() anywhere to debug.";
+
+  let solved = store.get("vcb.solved", {});
+  let cur = store.get("vcb.cur", 0);
+  if (cur >= LESSONS.length) cur = 0;
+  let hintN = 0, solStep = 0;
+  const ed = $("code");
+  const ready = typeof Sk !== "undefined";
+  $("status").textContent = ready ? "Python ready" : "Python didn't load. Check your connection and reload.";
+  $("status").className = ready ? "" : "err";
+
+  // ---------- Python runner ----------
+  function readf(x) {
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined) throw "File not found: '" + x + "'";
+    return Sk.builtinFiles.files[x];
+  }
+  function exec(src, onOut) {
+    Sk.configure({ output: onOut, read: readf, __future__: Sk.python3, execLimit: 6000, yieldLimit: 100 });
+    return Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, src, true));
+  }
+  function friendly(err) {
+    let s = err.toString();
+    if (/NoneType/.test(s)) s += "\n\nTip: something returned None. Did you forget a return statement, or leave 'pass' in?";
+    if (/TimeLimitError/.test(s)) s += "\n\nTip: your code ran too long. Look for a loop that never ends.";
+    if (/IndentationError/.test(s)) s += "\n\nTip: Python needs consistent indentation. Use 4 spaces per level.";
+    if (/NameError/.test(s)) s += "\n\nTip: a name is used before it exists. Check spelling, and that you defined it above.";
+    return s;
+  }
+  function showErr(el, text) { el.innerHTML = ""; const sp = document.createElement("span"); sp.className = "err"; sp.textContent = text; el.appendChild(sp); }
+
+  // ---------- Navigation ----------
+  function solvedCount() { return LESSONS.filter(l => solved[l.id]).length; }
+  function buildNav() {
+    const rail = $("rail"), pick = $("picker");
+    rail.innerHTML = ""; pick.innerHTML = "";
+    let part = null, st = null, grp = null;
+    LESSONS.forEach((l, i) => {
+      if (l.part !== part) { part = l.part; const p = document.createElement("div"); p.className = "part"; p.textContent = part; rail.appendChild(p); }
+      if (l.stage !== st) {
+        st = l.stage;
+        const h = document.createElement("div"); h.className = "stage"; h.textContent = st; rail.appendChild(h);
+        grp = document.createElement("optgroup"); grp.label = st; pick.appendChild(grp);
+      }
+      const b = document.createElement("button");
+      b.className = "l" + (solved[l.id] ? " done" : "");
+      b.setAttribute("aria-current", i === cur ? "true" : "false");
+      b.innerHTML = '<span class="dot">' + (solved[l.id] ? "✓" : "") + "</span><span></span>";
+      b.lastChild.textContent = l.title;
+      b.onclick = () => go(i);
+      rail.appendChild(b);
+      const o = document.createElement("option");
+      o.value = i; o.textContent = (solved[l.id] ? "✓ " : "") + l.title; if (i === cur) o.selected = true;
+      grp.appendChild(o);
+    });
+    pick.onchange = () => go(+pick.value);
+    const n = solvedCount();
+    $("pbar").style.width = (n / LESSONS.length * 100) + "%";
+    $("ptext").textContent = n + " of " + LESSONS.length + " lessons solved";
+  }
+  function gutter() {
+    const n = ed.value.split("\n").length; let s = "";
+    for (let i = 1; i <= n; i++) s += i + "\n";
+    $("gut").textContent = s;
+    ed.style.height = "auto"; ed.style.height = ed.scrollHeight + "px";
+  }
+  function go(i) {
+    saveCode(); cur = i; store.set("vcb.cur", i);
+    const l = LESSONS[i]; hintN = 0; solStep = 0;
+    $("eyebrow").textContent = l.stage + " · lesson " + (i + 1) + " of " + LESSONS.length;
+    $("title").textContent = l.title;
+    $("learnbox").hidden = !l.learn;
+    if (l.learn) { $("learn").innerHTML = l.learn; $("example").textContent = l.example; $("exout").hidden = true; }
+    $("why").textContent = l.why; $("task").innerHTML = l.task; $("pseudo").textContent = l.pseudo;
+    ed.value = store.get("vcb.code." + l.id, l.starter); gutter();
+    ["d-pseudo", "d-hints", "d-sol"].forEach(d => ($(d).open = false));
+    renderHints(); renderSol();
+    $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = DEFAULT_OUT;
+    buildNav();
+  }
+
+  // ---------- Hints & solution ----------
+  function renderHints() {
+    const l = LESSONS[cur], ol = $("hints"); ol.innerHTML = "";
+    for (let i = 0; i < hintN; i++) { const li = document.createElement("li"); li.textContent = l.hints[i]; ol.appendChild(li); }
+    if (hintN === 0) { const li = document.createElement("li"); li.style.listStyle = "none"; li.style.color = "var(--muted)"; li.textContent = "Hints appear one at a time."; ol.appendChild(li); }
+    $("hcount").textContent = hintN + "/" + l.hints.length;
+    $("morehint").hidden = hintN >= l.hints.length;
+  }
+  $("morehint").onclick = () => { hintN++; renderHints(); };
+  function renderSol() {
+    const b = $("solbody"), l = LESSONS[cur]; b.innerHTML = "";
+    if (solStep === 0) {
+      b.innerHTML = '<div class="warnbox">Struggle for 15 minutes first. Reading a solution feels like learning, but writing it is what sticks.</div>';
+      const btn = document.createElement("button"); btn.className = "btn plain"; btn.textContent = "I tried, show me";
+      btn.onclick = () => { solStep = 1; renderSol(); }; b.appendChild(btn);
+    } else {
+      const p = document.createElement("pre"); p.className = "pc"; p.textContent = l.solution; b.appendChild(p);
+      const n = document.createElement("p"); n.className = "note"; n.style.marginTop = "10px";
+      n.textContent = "Now close this, reset your code, and write it again from memory. Then redo it tomorrow.";
+      b.appendChild(n);
+    }
+  }
+
+  // ---------- Editor ----------
+  function saveCode() { if (LESSONS[cur]) store.set("vcb.code." + LESSONS[cur].id, ed.value); }
+  ed.addEventListener("input", () => { gutter(); saveCode(); });
+  ed.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runTests(); return; }
+    const s = ed.selectionStart, en = ed.selectionEnd, v = ed.value;
+    const set = (val, pos) => { ed.value = val; ed.selectionStart = ed.selectionEnd = pos; gutter(); saveCode(); };
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        const ls = v.lastIndexOf("\n", s - 1) + 1, m = v.slice(ls).match(/^ {1,4}/);
+        if (m) set(v.slice(0, ls) + v.slice(ls + m[0].length), Math.max(ls, s - m[0].length));
+      } else set(v.slice(0, s) + "    " + v.slice(en), s + 4);
+    } else if (e.key === "Enter") {
+      const ls = v.lastIndexOf("\n", s - 1) + 1, line = v.slice(ls, s);
+      let ind = line.match(/^ */)[0]; if (/:\s*$/.test(line)) ind += "    ";
+      e.preventDefault(); set(v.slice(0, s) + "\n" + ind + v.slice(en), s + 1 + ind.length);
+    } else if (e.key === "Backspace" && s === en) {
+      const ls = v.lastIndexOf("\n", s - 1) + 1, before = v.slice(ls, s);
+      if (before.length && /^ +$/.test(before) && before.length % 4 === 0) { e.preventDefault(); set(v.slice(0, s - 4) + v.slice(s), s - 4); }
+    }
+  });
+
+  // ---------- Running ----------
+  async function runExample() {
+    if (!ready) return;
+    const box = $("exout"); box.hidden = false; box.textContent = "Running…"; let out = "";
+    try { await exec(LESSONS[cur].example, t => (out += t)); box.textContent = out || "(no output)"; }
+    catch (e) { showErr(box, out + friendly(e)); }
+  }
+  async function runOnly() {
+    if (!ready) return;
+    let out = ""; $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = "Running…";
+    try { await exec(ed.value, t => (out += t)); $("out").textContent = out || "(no output. Add print() to see values.)"; }
+    catch (e) { showErr($("out"), out + friendly(e)); }
+  }
+  async function runTests() {
+    if (!ready) return;
+    const l = LESSONS[cur]; let out = "";
+    $("out").textContent = "Running tests…"; $("banner").innerHTML = "";
+    const res = $("res"); res.innerHTML = ""; res.hidden = true;
+    let mod;
+    try { mod = await exec(ed.value + "\n" + HARNESS + "\n" + l.tests, t => (out += t)); }
+    catch (e) { showErr($("out"), out + friendly(e)); return; }
+    const r = Sk.ffi.remapToJs(mod.tp$getattr(new Sk.builtin.str("_results")));
+    let pass = 0;
+    r.forEach(([ok, m]) => {
+      const d = document.createElement("div"); d.className = ok ? "p" : "f";
+      d.textContent = (ok ? "✓ " : "✗ ") + m; res.appendChild(d); if (ok) pass++;
+    });
+    res.hidden = false; $("out").textContent = out;
+    if (pass === r.length) {
+      solved[l.id] = true; store.set("vcb.solved", solved);
+      const last = cur === LESSONS.length - 1;
+      $("banner").innerHTML = '<div class="banner win">All ' + r.length + " tests pass." +
+        (last ? " You finished the course." : ' <button class="btn plain" id="nextb" style="margin-left:8px">Next lesson</button>') + "</div>";
+      const nb = $("nextb"); if (nb) nb.onclick = () => go(cur + 1);
+      buildNav();
+    }
+  }
+  $("runex").onclick = runExample;
+  $("run").onclick = runOnly;
+  $("check").onclick = runTests;
+  $("reset").onclick = function () {
+    if (this.dataset.arm) { ed.value = LESSONS[cur].starter; gutter(); saveCode(); this.textContent = "Reset code"; delete this.dataset.arm; }
+    else { this.dataset.arm = 1; this.textContent = "Click again to reset"; setTimeout(() => { this.textContent = "Reset code"; delete this.dataset.arm; }, 3000); }
+  };
+
+  // ---------- Timer ----------
+  let tLeft = 1200, tId = null;
+  function tdraw() {
+    const a = Math.abs(tLeft), m = Math.floor(a / 60), s = a % 60;
+    $("tclock").textContent = (tLeft < 0 ? "-" : "") + m + ":" + String(s).padStart(2, "0");
+    $("tclock").className = tLeft < 0 ? "over" : "";
+  }
+  $("tstart").onclick = () => {
+    if (tId) { clearInterval(tId); tId = null; $("tstart").textContent = "Start"; }
+    else { tId = setInterval(() => { tLeft--; tdraw(); }, 1000); $("tstart").textContent = "Pause"; }
+  };
+  $("treset").onclick = () => { clearInterval(tId); tId = null; tLeft = 1200; tdraw(); $("tstart").textContent = "Start"; };
+
+  // ---------- Concept cards ----------
+  let rating = store.get("vcb.cards", {}); // index -> "good" | "again"
+  const topics = ["All", ...new Set(CONCEPTS.map(c => c.topic))];
+  let topic = "All", deck = [], pos = 0, shown = false;
+  function buildDeck() {
+    const idx = CONCEPTS.map((c, i) => i).filter(i => topic === "All" || CONCEPTS[i].topic === topic);
+    const rank = i => (rating[i] === "again" ? 0 : rating[i] === "good" ? 2 : 1);
+    deck = idx.sort((a, b) => rank(a) - rank(b) || a - b); pos = 0; shown = false; drawCard();
+  }
+  function drawFilters() {
+    const f = $("filters"); f.innerHTML = "";
+    topics.forEach(t => {
+      const b = document.createElement("button"); b.className = "chip"; b.textContent = t;
+      b.setAttribute("aria-pressed", t === topic ? "true" : "false");
+      b.onclick = () => { topic = t; drawFilters(); buildDeck(); }; f.appendChild(b);
+    });
+  }
+  function drawCard() {
+    const i = deck[pos], c = CONCEPTS[i];
+    $("ctopic").textContent = c.topic + (rating[i] === "again" ? " · marked for review" : rating[i] === "good" ? " · you knew this" : "");
+    $("cpos").textContent = (pos + 1) + " / " + deck.length;
+    $("cq").textContent = c.q; $("ca").textContent = c.a; $("ca").hidden = !shown;
+    const btns = $("cbtns"); btns.innerHTML = "";
+    const mk = (label, cls, fn) => { const b = document.createElement("button"); b.className = "btn " + cls; b.textContent = label; b.onclick = fn; btns.appendChild(b); };
+    if (!shown) mk("Reveal answer", "primary", () => { shown = true; drawCard(); });
+    else {
+      mk("I knew it", "good", () => rate("good"));
+      mk("Review again", "again", () => rate("again"));
+    }
+    if (pos > 0) mk("Back", "plain", () => { pos--; shown = false; drawCard(); });
+    const g = Object.values(rating).filter(v => v === "good").length;
+    $("ctally").textContent = g + " of " + CONCEPTS.length + " cards marked as known.";
+  }
+  function rate(v) { rating[deck[pos]] = v; store.set("vcb.cards", rating); pos = (pos + 1) % deck.length; shown = false; drawCard(); }
+
+  // ---------- Tabs ----------
+  function tab(which) {
+    const course = which === "course";
+    $("view-course").hidden = !course; $("view-cards").hidden = course;
+    $("tab-course").setAttribute("aria-selected", course); $("tab-cards").setAttribute("aria-selected", !course);
+    store.set("vcb.tab", which);
+  }
+  $("tab-course").onclick = () => tab("course");
+  $("tab-cards").onclick = () => tab("cards");
+
+  drawFilters(); buildDeck();
+  tab(location.hash === "#cards" ? "cards" : store.get("vcb.tab", "course"));
+  go(cur);
+})();
+
+</script>
+</body>
+</html>

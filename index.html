@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vibe Coder Bootcamp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Learn to write code yourself again: Python from zero up to implementing attention, with runnable exercises and tests in the browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Vibe Coder <span>Bootcamp</span></h1>
+    <p class="sub">Python from zero up to writing attention by hand, for ML interviews. Every exercise runs in your browser and the tests tell you what's wrong. No autocomplete, no AI.</p>
+  </div>
+  <div class="progress" aria-live="polite">
+    <div class="bar"><i id="pbar"></i></div>
+    <small id="ptext"></small>
+  </div>
+</header>
+<div class="foot" style="margin:0 auto 16px">
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-course" aria-selected="true">Course</button>
+    <button class="tab" role="tab" id="tab-cards" aria-selected="false">Concept cards</button>
+  </div>
+</div>
+
+<div class="app" id="view-course">
+  <nav class="rail" id="rail" aria-label="Lessons"></nav>
+  <main>
+    <select class="picker" id="picker" aria-label="Choose a lesson"></select>
+    <section class="card">
+      <div class="eyebrow" id="eyebrow"></div>
+      <h2 id="title"></h2>
+      <div id="learnbox" hidden>
+        <div class="learn" id="learn"></div>
+        <div class="example">
+          <div class="bar"><span>Example</span><button class="btn plain" id="runex">Run example</button></div>
+          <pre class="pc" id="example"></pre>
+          <pre class="exout" id="exout" hidden></pre>
+        </div>
+        <div class="divider"></div>
+        <p class="yourturn">Your turn</p>
+      </div>
+      <p class="why"><b>Why it matters:</b> <span id="why"></span></p>
+      <p class="task" id="task"></p>
+    </section>
+    <div class="work">
+      <div class="editor-wrap">
+        <div class="ed-bar"><span>solution.py</span><span id="status" class="loading">Loading Python…</span></div>
+        <div class="ed"><div class="gut" id="gut">1</div><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Code editor"></textarea></div>
+        <div class="actions">
+          <button class="btn primary" id="check">Run tests<span class="kbd">Ctrl+Enter</span></button>
+          <button class="btn ghost" id="run">Run only</button>
+          <button class="btn ghost" id="reset">Reset code</button>
+        </div>
+      </div>
+      <div class="side">
+        <div class="console">
+          <h3>Output</h3>
+          <div id="banner"></div>
+          <div class="res" id="res" hidden></div>
+          <pre id="out"></pre>
+        </div>
+        <div class="console helper">
+          <details id="d-pseudo"><summary>Pseudocode</summary><div class="dbody"><p class="note">Try to plan it yourself before opening this.</p><pre class="pc" id="pseudo"></pre></div></details>
+          <details id="d-hints"><summary>Hints <span id="hcount" style="color:var(--muted);font-weight:400"></span></summary><div class="dbody"><ol class="hints" id="hints"></ol><p style="margin:10px 0 0"><button class="btn plain" id="morehint">Show next hint</button></p></div></details>
+          <details id="d-sol"><summary>Solution</summary><div class="dbody" id="solbody"></div></details>
+        </div>
+        <div class="card">
+          <h3 style="font-family:var(--f-display);margin:0 0 8px;font-size:1rem">Interview timer</h3>
+          <div class="timer"><b id="tclock">20:00</b><button class="btn plain" id="tstart">Start</button><button class="btn plain" id="treset">Reset</button></div>
+          <h3 style="font-family:var(--f-display);margin:16px 0 6px;font-size:1rem">When you freeze</h3>
+          <ol class="method">
+            <li>Say the inputs, outputs and their shapes out loud.</li>
+            <li>Work one tiny example by hand.</li>
+            <li>Write the function signature and a comment per step.</li>
+            <li>Fill in each comment with code.</li>
+            <li>Test on your example, then edge cases.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="view-cards" hidden>
+  <div class="cards-wrap">
+    <div class="filters" id="filters"></div>
+    <section class="card flash">
+      <div class="meta"><span id="ctopic"></span><span id="cpos"></span></div>
+      <p class="q" id="cq"></p>
+      <p class="a" id="ca" hidden></p>
+      <div class="row" id="cbtns"></div>
+    </section>
+    <p class="tally" id="ctally"></p>
+    <p class="note">Answer out loud as if an interviewer asked, in two or three sentences, before you reveal. Cards you mark "Review again" come back first.</p>
+  </div>
+</div>
+
+<footer class="foot">Open source under the MIT license. Progress is saved in this browser only.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script src="course/harness.js"></script>
+<script src="course/foundations.js"></script>
+<script src="course/ml.js"></script>
+<script src="course/concepts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
