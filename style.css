@@ -1,3 +1,4 @@
+[hidden]{display:none!important}
 /* Layout: lesson rail on the left, workbench (brief, editor, console) on the right; rail collapses to a picker on phones */
 :root{
   --bg:#f3f5f8; --panel:#ffffff; --ink:#18202b; --muted:#5b6676; --line:#dde2ea;

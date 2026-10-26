@@ -1,9 +1,11 @@
 {
   "name": "vibe-coder-bootcamp",
   "version": "1.0.0",
-  "description": "Learn to actually write code again: Python from zero up to implementing attention, for ML interviews.",
+  "description": "Learn to actually write code again: Python from zero to NumPy, pandas, PyTorch and attention, for ML interviews.",
   "private": true,
   "license": "MIT",
-  "scripts": { "test": "node tests/check-solutions.js" },
+  "scripts": { "test": "node tests/check-solutions.js",
+    "test:real-torch": "REAL_TORCH=1 node tests/check-solutions.js",
+    "build": "node build.js" },
   "devDependencies": { "skulpt": "1.2.0" }
 }

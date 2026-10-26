@@ -8,7 +8,10 @@
 
   const PARTS = [
     { name: "Part 1 · Foundations", lessons: FOUNDATION_LESSONS },
-    { name: "Part 2 · ML coding", lessons: ML_LESSONS },
+    { name: "Part 2 · ML from scratch", lessons: ML_LESSONS },
+    { name: "Part 3 · NumPy", lessons: NUMPY_LESSONS },
+    { name: "Part 4 · pandas and data prep", lessons: DATA_LESSONS },
+    { name: "Part 5 · PyTorch", lessons: PYTORCH_LESSONS },
   ];
   const LESSONS = PARTS.flatMap(p => p.lessons.map(l => Object.assign({ part: p.name }, l)));
   const DEFAULT_OUT = "Write your code, then press Run tests.\nUse print() anywhere to debug.";
@@ -18,24 +21,140 @@
   if (cur >= LESSONS.length) cur = 0;
   let hintN = 0, solStep = 0;
   const ed = $("code");
-  const ready = typeof Sk !== "undefined";
-  $("status").textContent = ready ? "Python ready" : "Python didn't load. Check your connection and reload.";
-  $("status").className = ready ? "" : "err";
 
-  // ---------- Python runner ----------
+  // ---------- Python runtimes ----------
+  // Main runtime: Pyodide (real CPython compiled to WebAssembly) in a Web Worker, so
+  // NumPy and pandas work and an infinite loop can be stopped. If Pyodide can't load,
+  // plain-Python lessons fall back to Skulpt, a small JS interpreter.
+  const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
+  const RUN_TIMEOUT = 20000;
+  const WORKER_SRC = `
+let py = null; const loaded = new Set();
+function write(files) {
+  for (const [p, c] of Object.entries(files)) {
+    let d = "/home/pyodide";
+    for (const part of p.split("/").slice(0, -1)) { d += "/" + part; try { py.FS.mkdir(d); } catch (_) {} }
+    py.FS.writeFile("/home/pyodide/" + p, c);
+  }
+}
+self.onmessage = async (e) => {
+  const m = e.data;
+  try {
+    if (m.type === "init") {
+      importScripts(m.index + "pyodide.js");
+      py = await loadPyodide({ indexURL: m.index });
+      write(m.files);
+      py.runPython("import sys; sys.path.insert(0, '/home/pyodide')");
+      postMessage({ id: m.id, ok: true }); return;
+    }
+    if (m.type === "run") {
+      const need = (m.packages || []).filter(p => p !== "torch" && !loaded.has(p));
+      if (need.length) { await py.loadPackage(need); need.forEach(p => loaded.add(p)); }
+      postMessage({ id: m.id, started: true });
+      let out = "";
+      py.setStdout({ batched: s => { out += s + "\\n"; } });
+      py.setStderr({ batched: s => { out += s + "\\n"; } });
+      const g = py.globals.get("dict")();
+      try {
+        await py.runPythonAsync(m.code, { globals: g });
+        let results = null;
+        if (g.has("_results")) results = g.get("_results").toJs();
+        postMessage({ id: m.id, ok: true, out, results });
+      } catch (err) {
+        postMessage({ id: m.id, ok: false, out, error: String(err.message || err) });
+      } finally { g.destroy(); }
+    }
+  } catch (err) { postMessage({ id: m.id, ok: false, out: "", error: String(err.message || err) }); }
+};`;
+  let engine = "loading"; // "pyodide" | "skulpt" | "none" | "loading"
+  let worker = null, msgId = 0, pending = {};
+  function setStatus(text, cls) { $("status").textContent = text; $("status").className = cls || ""; }
+  function startWorker() {
+    return new Promise((resolve, reject) => {
+      try {
+        const url = URL.createObjectURL(new Blob([WORKER_SRC], { type: "text/javascript" }));
+        worker = new Worker(url);
+      } catch (e) { reject(e); return; }
+      worker.onmessage = (e) => { const p = pending[e.data.id]; if (p) p(e.data); };
+      worker.onerror = (e) => reject(e);
+      const id = ++msgId;
+      const t = setTimeout(() => reject(new Error("timeout")), 60000);
+      pending[id] = (r) => { clearTimeout(t); delete pending[id]; r.ok ? resolve() : reject(new Error(r.error)); };
+      worker.postMessage({ type: "init", id, index: PYODIDE, files: typeof TORCH_FILES !== "undefined" ? TORCH_FILES : {} });
+    });
+  }
+  function boot() {
+    engine = "loading";
+    setStatus("Loading Python… (about 10 s the first time)", "loading");
+    return startWorker().then(() => { engine = "pyodide"; setStatus("Python 3 ready"); })
+      .catch(() => {
+        try { worker && worker.terminate(); } catch (_) {}
+        worker = null;
+        engine = typeof Sk !== "undefined" ? "skulpt" : "none";
+        setStatus(engine === "skulpt" ? "Basic Python only (NumPy/pandas unavailable here)" : "Python didn't load. Check your connection and reload.", engine === "skulpt" ? "loading" : "err");
+        refreshNotice();
+      });
+  }
+  let booting = boot();
+
   function readf(x) {
     if (Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined) throw "File not found: '" + x + "'";
     return Sk.builtinFiles.files[x];
   }
-  function exec(src, onOut) {
-    Sk.configure({ output: onOut, read: readf, __future__: Sk.python3, execLimit: 6000, yieldLimit: 100 });
-    return Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, src, true));
+  function skulptRun(src, wantResults) {
+    let out = "";
+    Sk.configure({ output: t => (out += t), read: readf, __future__: Sk.python3, execLimit: 6000, yieldLimit: 100 });
+    return Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, src, true))
+      .then(m => ({ ok: true, out, results: wantResults ? Sk.ffi.remapToJs(m.tp$getattr(new Sk.builtin.str("_results"))) : null }))
+      .catch(e => ({ ok: false, out, error: e.toString() }));
+  }
+  function pyodideRun(src, packages, onStart) {
+    return new Promise((resolve) => {
+      const id = ++msgId; let timer = null;
+      pending[id] = (r) => {
+        if (r.started) { if (onStart) onStart(); timer = setTimeout(() => {
+          delete pending[id];
+          try { worker.terminate(); } catch (_) {}
+          booting = boot();
+          resolve({ ok: false, out: "", error: "TimeLimitError: your code ran for more than " + RUN_TIMEOUT / 1000 + " seconds and was stopped." });
+        }, RUN_TIMEOUT); return; }
+        clearTimeout(timer); delete pending[id]; resolve(r);
+      };
+      worker.postMessage({ type: "run", id, code: src, packages });
+    });
+  }
+  // Runs code with the current lesson's packages. Returns {ok, out, results, error}.
+  async function runPython(src, wantResults, onStart) {
+    await booting;
+    const pk = LESSONS[cur].packages || [];
+    if (engine === "pyodide") return pyodideRun(src, pk, onStart);
+    if (engine === "skulpt" && !pk.length) return skulptRun(src, wantResults);
+    return { ok: false, out: "", error: needsFullMessage() };
+  }
+  function needsFullMessage() {
+    return "This lesson needs NumPy, pandas or PyTorch, which only load when the course runs as a normal website " +
+      "(GitHub Pages, or `python3 -m http.server` in the project folder). Plain-Python lessons still work here.";
+  }
+  function refreshNotice() {
+    const pk = LESSONS[cur] && LESSONS[cur].packages;
+    $("libnote").hidden = !(pk && pk.length && engine !== "pyodide" && engine !== "loading");
+    $("libnote").textContent = needsFullMessage();
+  }
+  function cleanTrace(s) {
+    // Drop Pyodide's internal frames so the traceback shows only the learner's code.
+    const lines = s.split("\n");
+    const i = lines.findIndex(l => l.includes('File "<exec>"'));
+    const body = i >= 0 ? ["Traceback (most recent call last):"].concat(lines.slice(i)) : lines;
+    return body.filter(l => !/\/lib\/python3|_pyodide/.test(l)).join("\n").replace(/File "<exec>"/g, "File \"solution.py\"").trim();
   }
   function friendly(err) {
-    let s = err.toString();
+    let s = cleanTrace(String(err));
     if (/NoneType/.test(s)) s += "\n\nTip: something returned None. Did you forget a return statement, or leave 'pass' in?";
     if (/TimeLimitError/.test(s)) s += "\n\nTip: your code ran too long. Look for a loop that never ends.";
     if (/IndentationError/.test(s)) s += "\n\nTip: Python needs consistent indentation. Use 4 spaces per level.";
+    const mod = s.match(/No module named '(numpy|pandas)'/);
+    if (mod) return "ModuleNotFoundError: " + mod[1] + " didn't download. Check your internet connection and reload the page.";
+    s = s.split("\nThe module '")[0];
     if (/NameError/.test(s)) s += "\n\nTip: a name is used before it exists. Check spelling, and that you defined it above.";
     return s;
   }
@@ -88,6 +207,7 @@
     ["d-pseudo", "d-hints", "d-sol"].forEach(d => ($(d).open = false));
     renderHints(); renderSol();
     $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = DEFAULT_OUT;
+    refreshNotice();
     buildNav();
   }
 
@@ -138,27 +258,29 @@
   });
 
   // ---------- Running ----------
-  async function runExample() {
-    if (!ready) return;
-    const box = $("exout"); box.hidden = false; box.textContent = "Running…"; let out = "";
-    try { await exec(LESSONS[cur].example, t => (out += t)); box.textContent = out || "(no output)"; }
-    catch (e) { showErr(box, out + friendly(e)); }
+  let busy = false;
+  function loadingText(base) {
+    const pk = (LESSONS[cur].packages || []).filter(p => p !== "torch");
+    return pk.length ? "Loading " + pk.join(" and ") + " (first time only)…" : base;
   }
-  async function runOnly() {
-    if (!ready) return;
-    let out = ""; $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = "Running…";
-    try { await exec(ed.value, t => (out += t)); $("out").textContent = out || "(no output. Add print() to see values.)"; }
-    catch (e) { showErr($("out"), out + friendly(e)); }
-  }
-  async function runTests() {
-    if (!ready) return;
-    const l = LESSONS[cur]; let out = "";
-    $("out").textContent = "Running tests…"; $("banner").innerHTML = "";
+  async function guarded(fn) { if (busy) return; busy = true; try { await fn(); } finally { busy = false; } }
+  const runExample = () => guarded(async () => {
+    const box = $("exout"); box.hidden = false; box.textContent = loadingText("Running…");
+    const r = await runPython(LESSONS[cur].example, false, () => (box.textContent = "Running…"));
+    if (r.ok) box.textContent = r.out || "(no output)"; else showErr(box, r.out + friendly(r.error));
+  });
+  const runOnly = () => guarded(async () => {
+    $("res").hidden = true; $("banner").innerHTML = ""; $("out").textContent = loadingText("Running…");
+    const r = await runPython(ed.value, false, () => ($("out").textContent = "Running…"));
+    if (r.ok) $("out").textContent = r.out || "(no output. Add print() to see values.)"; else showErr($("out"), r.out + friendly(r.error));
+  });
+  const runTests = () => guarded(async () => {
+    const l = LESSONS[cur];
+    $("out").textContent = loadingText("Running tests…"); $("banner").innerHTML = "";
     const res = $("res"); res.innerHTML = ""; res.hidden = true;
-    let mod;
-    try { mod = await exec(ed.value + "\n" + HARNESS + "\n" + l.tests, t => (out += t)); }
-    catch (e) { showErr($("out"), out + friendly(e)); return; }
-    const r = Sk.ffi.remapToJs(mod.tp$getattr(new Sk.builtin.str("_results")));
+    const rr = await runPython(ed.value + "\n" + HARNESS + "\n" + l.tests, true, () => ($("out").textContent = "Running tests…"));
+    if (!rr.ok) { showErr($("out"), rr.out + friendly(rr.error)); return; }
+    const r = rr.results || []; const out = rr.out;
     let pass = 0;
     r.forEach(([ok, m]) => {
       const d = document.createElement("div"); d.className = ok ? "p" : "f";
@@ -173,7 +295,7 @@
       const nb = $("nextb"); if (nb) nb.onclick = () => go(cur + 1);
       buildNav();
     }
-  }
+  });
   $("runex").onclick = runExample;
   $("run").onclick = runOnly;
   $("check").onclick = runTests;
